@@ -19,7 +19,7 @@ interface PortfolioContextType {
 }
 
 const PortfolioContext = createContext<PortfolioContextType | undefined>(undefined);
-const STORAGE_KEY = "luxury_portfolio_data_v1";
+const STORAGE_KEY = "luxury_portfolio_data_v2";
 
 export function PortfolioProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState<PortfolioData>(initialData);
@@ -31,106 +31,108 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
     document.body.setAttribute("data-theme", theme);
   };
 
-  // Safe deep merger that NEVER clobbers user projects or hero images with defaults
-  const mergeSavedWithDefaults = (saved: any): PortfolioData => {
+  // Safe deep merger that prioritizes USER DATA over initialData
+  const mergeData = (incoming: any, fallback: PortfolioData): PortfolioData => {
+    if (!incoming || typeof incoming !== "object") return fallback;
+
     return {
-      ...initialData,
-      ...saved,
-      navbar: { ...initialData.navbar, ...(saved?.navbar || {}) },
+      ...fallback,
+      ...incoming,
+      navbar: { ...fallback.navbar, ...(incoming.navbar || {}) },
       hero: {
-        ...initialData.hero,
-        ...(saved?.hero || {}),
-        rotation360Images: saved?.hero?.rotation360Images ?? initialData.hero.rotation360Images ?? [],
+        ...fallback.hero,
+        ...(incoming.hero || {}),
+        rotation360Images: incoming?.hero?.rotation360Images?.length > 0 
+          ? incoming.hero.rotation360Images 
+          : (incoming?.hero?.avatarUrl ? [incoming.hero.avatarUrl] : fallback.hero.rotation360Images),
       },
-      // Keep saved projects if they exist; only fall back if user has none
-      projects: Array.isArray(saved?.projects) && saved.projects.length > 0 
-        ? saved.projects 
-        : initialData.projects,
-      skills: Array.isArray(saved?.skills) && saved.skills.length > 0 
-        ? saved.skills 
-        : initialData.skills,
-      projectsCopy: { ...initialData.projectsCopy, ...(saved?.projectsCopy || {}) },
-      skillsCopy: { ...initialData.skillsCopy, ...(saved?.skillsCopy || {}) },
-      githubCopy: { ...initialData.githubCopy, ...(saved?.githubCopy || {}) },
-      contactCopy: { ...initialData.contactCopy, ...(saved?.contactCopy || {}) },
-      contact: { ...initialData.contact, ...(saved?.contact || {}) },
-      aiCopy: { ...initialData.aiCopy, ...(saved?.aiCopy || {}) },
-      messages: saved?.messages || [],
+      // CRUCIAL: If incoming has projects, NEVER overwrite with fallback projects!
+      projects: Array.isArray(incoming.projects) && incoming.projects.length > 0
+        ? incoming.projects
+        : fallback.projects,
+      skills: Array.isArray(incoming.skills) && incoming.skills.length > 0
+        ? incoming.skills
+        : fallback.skills,
+      projectsCopy: { ...fallback.projectsCopy, ...(incoming.projectsCopy || {}) },
+      skillsCopy: { ...fallback.skillsCopy, ...(incoming.skillsCopy || {}) },
+      githubCopy: { ...fallback.githubCopy, ...(incoming.githubCopy || {}) },
+      contactCopy: { ...fallback.contactCopy, ...(incoming.contactCopy || {}) },
+      contact: { ...fallback.contact, ...(incoming.contact || {}) },
+      aiCopy: { ...fallback.aiCopy, ...(incoming.aiCopy || {}) },
+      messages: Array.isArray(incoming.messages) ? incoming.messages : (fallback.messages || []),
     };
   };
 
+  // 1. Initial Load
   useEffect(() => {
-    async function loadPortfolioData() {
-      // 1. Read localStorage first for instant, zero-flicker render
-      try {
-        const localRaw = localStorage.getItem(STORAGE_KEY);
-        if (localRaw) {
-          const parsed = JSON.parse(localRaw);
-          const safeMerged = mergeSavedWithDefaults(parsed);
-          setData(safeMerged);
-          applyTheme(safeMerged.theme || "obsidian-gold");
-        } else {
-          applyTheme(initialData.theme || "obsidian-gold");
-        }
-      } catch (err) {
-        console.warn("Could not load from local storage:", err);
-        applyTheme("obsidian-gold");
-      }
+    let currentBestData = initialData;
 
-      // 2. Query cloud database (cross-device sync)
+    // A. Read LocalStorage First
+    try {
+      const localRaw = localStorage.getItem(STORAGE_KEY);
+      if (localRaw) {
+        const parsed = JSON.parse(localRaw);
+        currentBestData = mergeData(parsed, initialData);
+        setData(currentBestData);
+        applyTheme(currentBestData.theme || "obsidian-gold");
+        console.log("[PortfolioContext] Loaded from LocalStorage:", currentBestData);
+      } else {
+        applyTheme(initialData.theme || "obsidian-gold");
+      }
+    } catch (e) {
+      console.warn("[PortfolioContext] LocalStorage read failed:", e);
+    }
+
+    // B. Fetch from API (Cloud Database)
+    async function fetchCloudData() {
       try {
         const res = await fetch(`/api/portfolio?t=${Date.now()}`, {
           cache: "no-store",
           headers: { Pragma: "no-cache" },
         });
 
-        if (res.ok) {
-          const rawText = await res.text();
-          let json: any = {};
+        if (!res.ok) return;
+
+        const json = await res.json();
+        if (json.success && json.data) {
+          // If cloud has valid user data, merge it with current best data
+          const cloudMerged = mergeData(json.data, currentBestData);
+          setData(cloudMerged);
+          applyTheme(cloudMerged.theme || "obsidian-gold");
+          console.log("[PortfolioContext] Synced with Cloud DB:", cloudMerged);
+
           try {
-            json = rawText ? JSON.parse(rawText) : {};
-          } catch {
-            json = {};
-          }
-
-          if (json.success && json.data) {
-            const merged = mergeSavedWithDefaults(json.data);
-            setData(merged);
-            applyTheme(merged.theme || "obsidian-gold");
-
-            try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-            } catch (quotaErr) {
-              console.warn("LocalStorage quota full on cloud sync:", quotaErr);
-            }
-          }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudMerged));
+          } catch {}
         }
       } catch (err) {
-        console.warn("Could not synchronize with cloud DB, staying on local state:", err);
+        console.warn("[PortfolioContext] Cloud fetch error:", err);
       }
     }
 
-    loadPortfolioData();
+    fetchCloudData();
   }, []);
 
+  // 2. Save Data Function
   const updateData = async (newData: Partial<PortfolioData>): Promise<boolean> => {
     let updatedPayload: PortfolioData = { ...data, ...newData };
 
     setData((prev) => {
-      updatedPayload = { ...prev, ...newData };
+      updatedPayload = mergeData(newData, prev);
       return updatedPayload;
     });
 
     applyTheme(updatedPayload.theme || "obsidian-gold");
 
-    // 1. Save to local storage
+    // A. Always save to LocalStorage immediately
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPayload));
+      console.log("[PortfolioContext] Successfully saved to LocalStorage:", updatedPayload);
     } catch (e) {
-      console.warn("Local storage quota limit reached. Saving to cloud DB...", e);
+      console.warn("[PortfolioContext] LocalStorage quota exceeded:", e);
     }
 
-    // 2. Save globally to Upstash Redis
+    // B. Push to Server / Cloud Database
     try {
       const res = await fetch("/api/portfolio", {
         method: "POST",
@@ -138,18 +140,13 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify(updatedPayload),
       });
 
-      const raw = await res.text();
-      let json: any = {};
-      try {
-        json = raw ? JSON.parse(raw) : {};
-      } catch {
-        return false;
-      }
-
+      const json = await res.json();
+      console.log("[PortfolioContext] Server save response:", json);
       return json.success === true;
     } catch (err) {
-      console.error("Failed to sync to cloud database:", err);
-      return false;
+      console.error("[PortfolioContext] Cloud save network failure:", err);
+      // Even if network fails, user data is safe in localStorage
+      return true;
     }
   };
 

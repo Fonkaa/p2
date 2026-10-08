@@ -38,7 +38,7 @@ export const initialData: PortfolioData = {
     heading: "Engineered Deployments & Systems",
     subheading: "A curated index of production architectures, AI pipelines, and distributed platforms.",
   },
- projects: [
+projects: [
     {
       id: "smart-internship",
       title: "Smart Internship & Job Matching System",
@@ -46,13 +46,8 @@ export const initialData: PortfolioData = {
       description: "FastAPI and Express microservice architecture with automated scoring algorithms, normalized database schema, and role-based matching workflows.",
       tags: ["FastAPI", "Express.js", "PostgreSQL", "Next.js"],
       mediaType: "image",
-      mediaUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
-      rotation360Images: [
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
-      ],
+      mediaUrl: "", // <-- clear hardcoded unsplash url
+      rotation360Images: [], // <-- start empty so it only uses your uploaded photos
       liveUrl: "https://",
       githubUrl: "https://github.com/Fonkaa",
       featured: true,
@@ -64,13 +59,8 @@ export const initialData: PortfolioData = {
       description: "Robust property management endpoints, automated database migration scripts, transaction management, and rental verification pipelines.",
       tags: ["TypeScript", "Node.js", "PostgreSQL", "Docker"],
       mediaType: "image",
-      mediaUrl: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
-      rotation360Images: [
-        "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-      ],
+      mediaUrl: "", // <-- clear hardcoded unsplash url
+      rotation360Images: [], // <-- start empty
       liveUrl: "https://",
       githubUrl: "https://github.com/Fonkaa",
       featured: true,
