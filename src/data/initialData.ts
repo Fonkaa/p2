@@ -111,10 +111,10 @@ projects: [
     footerCopyright: "© 2026 Portfolio Atelier. All dynamic systems connected.",
     footerStatus: "High Availability Online",
   },
-  contact: {
+contact: {
     email: "fikiylkal@gmail.com",
-    phone: "+251 900 000 000",
-    telegram: "@Fonkaa",
+    phone: "+251 901 072 272",
+    telegram: "https://t.me/Commecii_commeca",
     instagram: "Fonkaa",
   },
 

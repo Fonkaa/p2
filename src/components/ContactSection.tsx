@@ -22,6 +22,7 @@ export default function ContactSection() {
   const { contact, contactCopy } = data;
 
   const targetEmail = contact?.email || "fikiylkal@gmail.com";
+  const targetPhone = contact?.phone || "+251 900 000 000";
 
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
@@ -47,12 +48,12 @@ export default function ContactSection() {
   };
 
   const getCleanTelegramUrl = (tg: string) => {
-    if (!tg) return "#";
+    if (!tg) return "https://t.me/Commecii_commeca";
     return tg.startsWith("http") ? tg : `https://t.me/${tg.replace("@", "")}`;
   };
 
   const getCleanInstagramUrl = (ig: string) => {
-    if (!ig) return "#";
+    if (!ig) return "https://instagram.com/Fonkaa";
     return ig.startsWith("http") ? ig : `https://instagram.com/${ig.replace("@", "")}`;
   };
 
@@ -145,7 +146,7 @@ export default function ContactSection() {
                 <h3 className="font-serif text-lg font-bold text-[var(--color-text)]">
                   {contactCopy?.formTitle || "Send Direct Transmission"}
                 </h3>
-                <p className="text-xs text-[var(--color-muted)] font-mono">
+                <p suppressHydrationWarning className="text-xs text-[var(--color-muted)] font-mono">
                   {contactCopy?.formSubtitle || `Dispatches directly to ${targetEmail} & Admin Codex`}
                 </p>
               </div>
@@ -155,7 +156,7 @@ export default function ContactSection() {
             {success && (
               <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono flex items-center gap-2 animate-in fade-in">
                 <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-                <span>{contactCopy?.successMessage || `Message delivered! It has been dispatched to ${targetEmail} and recorded in the Admin Dashboard.`}</span>
+                <span suppressHydrationWarning>{contactCopy?.successMessage || `Message delivered! It has been dispatched to ${targetEmail} and recorded in the Admin Dashboard.`}</span>
               </div>
             )}
 
@@ -256,7 +257,11 @@ export default function ContactSection() {
                 </button>
               </div>
 
-              <a href={`mailto:${targetEmail}`} className="text-xs sm:text-sm font-mono text-[var(--color-primary)] hover:underline truncate">
+              <a 
+                href={`mailto:${targetEmail}`} 
+                suppressHydrationWarning
+                className="text-xs sm:text-sm font-mono text-[var(--color-primary)] hover:underline truncate"
+              >
                 {targetEmail}
               </a>
             </div>
@@ -272,7 +277,7 @@ export default function ContactSection() {
                   </span>
                 </div>
                 <button
-                  onClick={() => handleCopy(contact?.phone || "", "phone")}
+                  onClick={() => handleCopy(targetPhone, "phone")}
                   className="p-1.5 rounded-lg glass-panel hover:text-[var(--color-primary)] transition-colors text-[var(--color-muted)]"
                   title="Copy Phone"
                 >
@@ -280,8 +285,12 @@ export default function ContactSection() {
                 </button>
               </div>
 
-              <a href={`tel:${contact?.phone}`} className="text-xs sm:text-sm font-mono text-[var(--color-primary)] hover:underline truncate">
-                {contact?.phone || "+251 9..."}
+              <a 
+                href={`tel:${targetPhone}`} 
+                suppressHydrationWarning
+                className="text-xs sm:text-sm font-mono text-[var(--color-primary)] hover:underline truncate"
+              >
+                {targetPhone}
               </a>
             </div>
 
@@ -289,7 +298,8 @@ export default function ContactSection() {
               href={getCleanTelegramUrl(contact?.telegram || "")}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 rounded-2xl glass-panel border border-[var(--color-border)] hover:border-[var(--color-primary)]/60 transition-all flex items-center justify-between group"
+              suppressHydrationWarning
+              className="p-4 rounded-2xl glass-panel border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-all flex items-center justify-between group"
             >
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-[var(--color-surface)] text-[var(--color-primary)] group-hover:scale-105 transition-transform">
@@ -307,6 +317,7 @@ export default function ContactSection() {
               href={getCleanInstagramUrl(contact?.instagram || "")}
               target="_blank"
               rel="noopener noreferrer"
+              suppressHydrationWarning
               className="p-4 rounded-2xl glass-panel border border-[var(--color-border)] hover:border-[var(--color-primary)]/60 transition-all flex items-center justify-between group"
             >
               <div className="flex items-center gap-3">
@@ -325,9 +336,9 @@ export default function ContactSection() {
 
         {/* Dynamic Footer Bar */}
         <div className="mt-14 pt-8 border-t border-[var(--color-border)]/40 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-[var(--color-muted)]">
-          <p>{contactCopy?.footerCopyright || `© 2026 Portfolio Atelier. Direct routing to ${targetEmail}.`}</p>
+          <p suppressHydrationWarning>{contactCopy?.footerCopyright || `© 2026 Portfolio Atelier. Direct routing to ${targetEmail}.`}</p>
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-[var(--color-primary)]">
+            <span suppressHydrationWarning className="flex items-center gap-1.5 text-[var(--color-primary)]">
               <Sparkles className="w-3.5 h-3.5" /> {contactCopy?.footerStatus || "High Availability Online"}
             </span>
           </div>

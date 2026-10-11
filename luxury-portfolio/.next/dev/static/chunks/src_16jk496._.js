@@ -4325,8 +4325,8 @@ const initialData = {
     },
     contact: {
         email: "fikiylkal@gmail.com",
-        phone: "+251 900 000 000",
-        telegram: "@Fonkaa",
+        phone: "+251 901 072 272",
+        telegram: "https://t.me/Commecii_commeca",
         instagram: "Fonkaa"
     },
     aiCopy: {
