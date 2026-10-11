@@ -1,10 +1,13 @@
 "use client";
 
-import Hero from "@/components/Hero";
-import ProjectsSection from "@/components/ProjectsSection";
+import dynamic from "next/dynamic";
 import GitHubProjects from "@/components/GitHubProjects";
 import SkillsSection from "@/components/SkillsSection";
 import ContactSection from "@/components/ContactSection";
+
+// Load Hero and ProjectsSection purely on client so dynamic 360° frames never clash with SSR
+const Hero = dynamic(() => import("@/components/Hero"), { ssr: false });
+const ProjectsSection = dynamic(() => import("@/components/ProjectsSection"), { ssr: false });
 
 export default function Home() {
   return (

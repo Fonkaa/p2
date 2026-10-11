@@ -12,6 +12,7 @@
     "@google/genai": "^2.24.0",
     "@upstash/redis": "^1.39.0",
     "canvas-confetti": "^1.9.4",
+    "cloudinary": "^2.11.0",
     "clsx": "^2.1.1",
     "framer-motion": "^13.4.4",
     "lucide-react": "^1.48.0",

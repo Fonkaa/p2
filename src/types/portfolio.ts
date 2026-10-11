@@ -1,137 +1,107 @@
-export interface Project {
-  id: string;
-  title: string;
-  tagline: string;
-  description: string;
-  tags: string[];
-  mediaType?: "image" | "video";
-  mediaUrl?: string;
-  galleryImages?: string[];
-  liveUrl?: string;
-  githubUrl?: string;
-  featured: boolean;
+import { NextRequest, NextResponse } from "next/server";
+import { Redis } from "@upstash/redis";
+import { initialData } from "@/data/initialData";
+
+export const dynamic = "force-dynamic";
+
+function getRedisInstance(): Redis | null {
+  const rawUrl =
+    process.env.KV_REST_API_URL ||
+    process.env.UPSTASH_REDIS_REST_URL ||
+    "";
+  const rawToken =
+    process.env.KV_REST_API_TOKEN ||
+    process.env.UPSTASH_REDIS_REST_TOKEN ||
+    "";
+
+  // Clean away any quotes, spaces, or line breaks that sneak in
+  const url = rawUrl.trim().replace(/^["']|["']$/g, "");
+  const token = rawToken.trim().replace(/^["']|["']$/g, "");
+
+  if (!url || !token) {
+    console.warn("[PORTFOLIO DB] Missing credentials. URL:", Boolean(url), "Token:", Boolean(token));
+    return null;
+  }
+
+  try {
+    return new Redis({ url, token });
+  } catch (err) {
+    console.error("[PORTFOLIO DB] Redis initialization failed:", err);
+    return null;
+  }
 }
 
-export interface SkillCategory {
-  category: string;
-  list: string[];
+const STORAGE_KEY = "luxury_portfolio_master_v1";
+
+export async function GET() {
+  const redis = getRedisInstance();
+
+  if (!redis) {
+    console.warn("[PORTFOLIO DB] Running without Redis. Returning initial data.");
+    return NextResponse.json({
+      success: true,
+      source: "no-redis-keys",
+      data: initialData,
+    });
+  }
+
+  try {
+    const record = await redis.get(STORAGE_KEY);
+
+    if (!record) {
+      console.log("[PORTFOLIO DB] Redis is connected but key is empty. Returning initial data.");
+      return NextResponse.json({
+        success: true,
+        source: "redis-empty",
+        data: initialData,
+      });
+    }
+
+    const parsedData = typeof record === "string" ? JSON.parse(record) : record;
+
+    return NextResponse.json({
+      success: true,
+      source: "redis-cloud",
+      data: parsedData,
+    });
+  } catch (err: any) {
+    console.error("[PORTFOLIO DB] Redis read error:", err?.message);
+    return NextResponse.json({
+      success: true,
+      source: "redis-error-fallback",
+      data: initialData,
+    });
+  }
 }
 
-export interface ContactInfo {
-  email: string;
-  phone: string;
-  telegram: string;
-  instagram: string;
-  linkedin?: string;
-}
+export async function POST(req: NextRequest) {
+  const redis = getRedisInstance();
 
-export interface ContactMessage {
-  id: string;
-  name: string;
-  email: string;
-  subject?: string;
-  message: string;
-  createdAt: string;
-  read?: boolean;
-}
+  if (!redis) {
+    console.error("[PORTFOLIO DB POST] Cannot persist: Redis is not configured.");
+    return NextResponse.json(
+      { success: false, error: "Database not connected. Check environment variables." },
+      { status: 500 }
+    );
+  }
 
-export type ThemeType = "obsidian-gold" | "emerald-rose" | "sapphire-ice" | "minimal-alabaster";
+  try {
+    const payload = await req.json();
 
-export interface PortfolioData {
-  adminPasscode: string;
-  theme: ThemeType;
+    // Store as a strict JSON string to avoid truncation
+    await redis.set(STORAGE_KEY, JSON.stringify(payload));
 
-  // 1. Navigation Bar Copy
-  navbar: {
-    brandMonogram: string;
-    brandTitle: string;
-    navOverview: string;
-    navProjects: string;
-    navSkills: string;
-    navContact: string;
-  };
+    console.log("[PORTFOLIO DB POST] Successfully persisted to Upstash Redis!");
 
-  // 2. Hero Section Copy & 360 Images
-  hero: {
-    name: string;
-    badge: string;
-    status: string;
-    headline: string;
-    subheadline: string;
-    bio: string;
-    avatarUrl: string;
-    rotation360Images?: string[];
-    resumeUrl: string;
-    ctaPrimaryText: string;
-    ctaSecondaryText: string;
-  };
-
-  // 3. Projects Section Copy
-  projectsCopy: {
-    badge: string;
-    heading: string;
-    subheading: string;
-  };
-  projects: Project[];
-
-  // 4. Skills Section Copy
-  skillsCopy: {
-    badge: string;
-    heading: string;
-    subheading: string;
-  };
-  skills: SkillCategory[];
-
-  // 5. GitHub Telemetry Copy
-  githubCopy: {
-    badge: string;
-    heading: string;
-    placeholder: string;
-    buttonText: string;
-  };
-  githubUsername: string;
-
-  // 6. Contact & Direct Transmission Copy
-  contactCopy: {
-    badge: string;
-    heading: string;
-    subheading: string;
-    formTitle: string;
-    formSubtitle: string;
-    buttonText: string;
-    successMessage: string;
-    footerCopyright: string;
-    footerStatus: string;
-  };
-  contact: ContactInfo;
-
-  // 7. AI Assistant Copy & Directives
-  aiCopy: {
-    title: string;
-    subtitle: string;
-    greeting: string;
-    inputPlaceholder: string;
-  };
-  aiInstructions: string;
-
-  // 8. Deep Document Grounding
-  resumePdfName?: string;
-  resumePdfText?: string;
-
-  // 9. Messages Inbox
-  messages?: ContactMessage[];
-}
-export interface Project {
-  id: string;
-  title: string;
-  tagline: string;
-  description: string;
-  tags: string[];
-  mediaType?: "image" | "video";
-  mediaUrl?: string;
-  galleryImages?: string[];
-  rotation360Images?: string[]; // 360 degree frame sequence for this specific project
-  liveUrl?: string;
-  githubUrl?: string;
-  featured: boolean;
+    return NextResponse.json({
+      success: true,
+      message: "Persisted to Upstash Redis Cloud.",
+    });
+  } catch (err: any) {
+    console.error("[PORTFOLIO DB POST] Write error:", err?.message);
+    return NextResponse.json(
+      { success: false, error: err?.message || "Failed to persist to Redis" },
+      { status: 500 }
+    );
+  }
 }

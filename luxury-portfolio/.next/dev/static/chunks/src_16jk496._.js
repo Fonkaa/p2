@@ -464,7 +464,6 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-// Inline Instagram SVG component to prevent missing lucide icon exports
 function InstagramIcon({ className = "w-3 h-3" }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
         className: className,
@@ -484,14 +483,14 @@ function InstagramIcon({ className = "w-3 h-3" }) {
                 ry: "5"
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminModal.tsx",
-                lineNumber: 27,
+                lineNumber: 26,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
                 d: "M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminModal.tsx",
-                lineNumber: 28,
+                lineNumber: 27,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("line", {
@@ -501,13 +500,13 @@ function InstagramIcon({ className = "w-3 h-3" }) {
                 y2: "6.5"
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminModal.tsx",
-                lineNumber: 29,
+                lineNumber: 28,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/AdminModal.tsx",
-        lineNumber: 18,
+        lineNumber: 17,
         columnNumber: 5
     }, this);
 }
@@ -524,21 +523,25 @@ function AdminModal() {
     const [flipDirection, setFlipDirection] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("forward");
     const [selectedProjectIndex, setSelectedProjectIndex] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(0);
     const [formData, setFormData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(data);
-    // PDF Parsing & Telemetry States
     const [parsingPdf, setParsingPdf] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [pdfStats, setPdfStats] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
-    // Multi-frame project upload state
+    // Uploader progress states
+    const [uploadingHero360, setUploadingHero360] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [uploadingHeroSingle, setUploadingHeroSingle] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [uploadingProject360, setUploadingProject360] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [uploadingSingle, setUploadingSingle] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    // Sync draft data ONLY when opening the modal
     __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].useEffect({
         "AdminModal.useEffect": ()=>{
-            setFormData(data);
-            setNewPasscode(data.adminPasscode || "fiker4620");
-            if (data.resumePdfText) {
-                setPdfStats(`Indexed document (${data.resumePdfText.length} characters)`);
+            if (isAdminOpen) {
+                setFormData(data);
+                setNewPasscode(data.adminPasscode || "fiker4620");
+                if (data.resumePdfText) {
+                    setPdfStats(`Indexed document (${data.resumePdfText.length} characters)`);
+                }
             }
         }
     }["AdminModal.useEffect"], [
-        data,
         isAdminOpen
     ]);
     if (!isAdminOpen) return null;
@@ -553,90 +556,108 @@ function AdminModal() {
             setError(true);
         }
     };
-    // Canvas Image Compression Helper (~70KB - 130KB per frame)
-    const compressImage = (file)=>{
-        return new Promise((resolve, reject)=>{
-            const reader = new FileReader();
-            reader.onload = (event)=>{
-                const img = new Image();
-                img.src = event.target?.result;
-                img.onload = ()=>{
-                    const canvas = document.createElement("canvas");
-                    const MAX_WIDTH = 600;
-                    const MAX_HEIGHT = 600;
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                        }
-                    }
-                    canvas.width = Math.round(width);
-                    canvas.height = Math.round(height);
-                    const ctx = canvas.getContext("2d");
-                    ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    // 50% WebP quality keeps each frame at only ~25-35KB
-                    resolve(canvas.toDataURL("image/webp", 0.5));
-                };
-                img.onerror = reject;
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    };
-    // Single File Upload
-    const handleFileUpload = async (e, onComplete)=>{
-        const file = e.target.files?.[0];
-        if (!file) return;
-        if (file.type.startsWith("video")) {
-            alert("Please provide an external URL for videos.");
-            return;
-        }
+    const uploadFileToCloud = async (file)=>{
         try {
-            const compressed = await compressImage(file);
-            onComplete(compressed, "image");
+            const body = new FormData();
+            body.append("file", file);
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body
+            });
+            const json = await res.json();
+            if (json.success && json.url) {
+                return json.url;
+            }
+            console.error("[UPLOAD FAILED]:", json.error);
+            return null;
         } catch (err) {
-            console.error("Compression error:", err);
+            console.error("[UPLOAD NETWORK ERROR]:", err);
+            return null;
+        }
+    };
+    // Hero: Upload Multiple 360° Frames
+    const handleHero360Upload = async (e)=>{
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+        setUploadingHero360(true);
+        try {
+            const fileList = Array.from(files).filter((f)=>f.type.startsWith("image/"));
+            const uploadedUrls = [];
+            for (const file of fileList){
+                const url = await uploadFileToCloud(file);
+                if (url) uploadedUrls.push(url);
+            }
+            if (uploadedUrls.length > 0) {
+                setFormData((prev)=>{
+                    const existing = Array.isArray(prev.hero.rotation360Images) ? prev.hero.rotation360Images : [];
+                    const combined = [
+                        ...existing,
+                        ...uploadedUrls
+                    ];
+                    return {
+                        ...prev,
+                        hero: {
+                            ...prev.hero,
+                            avatarUrl: combined[0] || prev.hero.avatarUrl,
+                            rotation360Images: combined
+                        }
+                    };
+                });
+            }
         } finally{
             e.target.value = "";
+            setUploadingHero360(false);
         }
     };
-    // Batch Upload 360° Frames for Currently Selected Project
+    // Hero: Upload Single Avatar
+    const handleHeroSingleUpload = async (e)=>{
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadingHeroSingle(true);
+        try {
+            const url = await uploadFileToCloud(file);
+            if (url) {
+                setFormData((prev)=>({
+                        ...prev,
+                        hero: {
+                            ...prev.hero,
+                            avatarUrl: url,
+                            rotation360Images: [
+                                url
+                            ]
+                        }
+                    }));
+            }
+        } finally{
+            e.target.value = "";
+            setUploadingHeroSingle(false);
+        }
+    };
+    // Project: Upload Multiple 360° Frames
     const handleProject360Upload = async (e)=>{
         const files = e.target.files;
         if (!files || files.length === 0) return;
         setUploadingProject360(true);
         try {
-            const fileList = Array.from(files);
-            const compressedBatch = [];
+            const fileList = Array.from(files).filter((f)=>f.type.startsWith("image/"));
+            const uploadedUrls = [];
             for (const file of fileList){
-                if (!file.type.startsWith("image/")) continue;
-                try {
-                    const comp = await compressImage(file);
-                    if (comp) compressedBatch.push(comp);
-                } catch (compErr) {
-                    console.warn("Frame compression failure:", file.name, compErr);
-                }
+                const url = await uploadFileToCloud(file);
+                if (url) uploadedUrls.push(url);
             }
-            if (compressedBatch.length > 0) {
+            if (uploadedUrls.length > 0) {
                 setFormData((prev)=>{
                     const upProjects = [
                         ...prev.projects
                     ];
                     const target = upProjects[selectedProjectIndex];
                     if (!target) return prev;
-                    const currentFrames = Array.isArray(target.rotation360Images) && target.rotation360Images.length > 0 ? target.rotation360Images : [
+                    const existingFrames = Array.isArray(target.rotation360Images) && target.rotation360Images.length > 0 ? target.rotation360Images : target.mediaUrl && !target.mediaUrl.includes("unsplash") ? [
                         target.mediaUrl
-                    ].filter(Boolean);
+                    ] : [];
                     const combined = [
-                        ...currentFrames,
-                        ...compressedBatch
+                        ...existingFrames,
+                        ...uploadedUrls
                     ];
                     upProjects[selectedProjectIndex] = {
                         ...target,
@@ -649,14 +670,43 @@ function AdminModal() {
                     };
                 });
             }
-        } catch (err) {
-            console.error("Project 360 upload processing error:", err);
         } finally{
             e.target.value = "";
             setUploadingProject360(false);
         }
     };
-    // Server-Side PDF Ingestion with Safe Parsing
+    // Project: Upload Single Thumbnail
+    const handleSingleThumbnailUpload = async (e)=>{
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploadingSingle(true);
+        try {
+            const url = await uploadFileToCloud(file);
+            if (url) {
+                setFormData((prev)=>{
+                    const up = [
+                        ...prev.projects
+                    ];
+                    if (!up[selectedProjectIndex]) return prev;
+                    up[selectedProjectIndex] = {
+                        ...up[selectedProjectIndex],
+                        mediaUrl: url,
+                        rotation360Images: [
+                            url
+                        ]
+                    };
+                    return {
+                        ...prev,
+                        projects: up
+                    };
+                });
+            }
+        } finally{
+            e.target.value = "";
+            setUploadingSingle(false);
+        }
+    };
+    // PDF Parser
     const handlePdfUpload = async (e)=>{
         const file = e.target.files?.[0];
         if (!file) return;
@@ -678,7 +728,7 @@ function AdminModal() {
             try {
                 json = JSON.parse(rawResponse);
             } catch  {
-                throw new Error(`Server returned non-JSON response (${res.status}): ${rawResponse.slice(0, 100)}`);
+                throw new Error(`Server returned non-JSON response (${res.status})`);
             }
             if (!res.ok || json.success === false) {
                 throw new Error(json.error || `Server error (HTTP ${res.status})`);
@@ -691,8 +741,7 @@ function AdminModal() {
                 }));
             setPdfStats(`Parsed ${json.numPages} page(s) (${cleanedText.length} characters indexed)`);
         } catch (err) {
-            console.error("PDF Parsing Error:", err);
-            setPdfStats(err.message || "Extraction failed. Ensure PDF is readable.");
+            setPdfStats(err.message || "Extraction failed.");
         } finally{
             setParsingPdf(false);
             e.target.value = "";
@@ -731,6 +780,8 @@ function AdminModal() {
             }));
         setTheme(selectedTheme);
     };
+    // Dedicated Save Action
+    // Dedicated Save Action
     const handleSave = async (e)=>{
         if (e) e.stopPropagation();
         setSuccessMessage("Binding to cloud...");
@@ -738,13 +789,14 @@ function AdminModal() {
             ...formData,
             adminPasscode: newPasscode.trim() || currentPassword
         };
-        const synced = await updateData(payload);
-        if (synced) {
+        // Pass true here so it performs the actual write to Redis!
+        const ok = await updateData(payload, true);
+        if (ok) {
             setSuccessMessage("Globally Synchronized (Phone & PC)!");
         } else {
-            setSuccessMessage("Saved to device & cloud!");
+            setSuccessMessage("Saved locally on device!");
         }
-        setTimeout(()=>setSuccessMessage(""), 3500);
+        setTimeout(()=>setSuccessMessage(""), 4000);
     };
     const availableThemes = [
         {
@@ -788,7 +840,7 @@ function AdminModal() {
                                 className: "w-4 h-4 text-[var(--color-primary)]"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AdminModal.tsx",
-                                lineNumber: 324,
+                                lineNumber: 369,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -796,13 +848,13 @@ function AdminModal() {
                                 children: spread === 0 ? "Volume Sealed" : `Folios ${spread * 2 - 1} & ${spread * 2} of 8`
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AdminModal.tsx",
-                                lineNumber: 325,
+                                lineNumber: 370,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AdminModal.tsx",
-                        lineNumber: 323,
+                        lineNumber: 368,
                         columnNumber: 9
                     }, this),
                     successMessage && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -812,7 +864,7 @@ function AdminModal() {
                                 className: "w-3.5 h-3.5"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/AdminModal.tsx",
-                                lineNumber: 332,
+                                lineNumber: 377,
                                 columnNumber: 13
                             }, this),
                             " ",
@@ -820,7 +872,7 @@ function AdminModal() {
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/AdminModal.tsx",
-                        lineNumber: 331,
+                        lineNumber: 376,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -834,18 +886,18 @@ function AdminModal() {
                             className: "w-4 h-4"
                         }, void 0, false, {
                             fileName: "[project]/src/components/AdminModal.tsx",
-                            lineNumber: 344,
+                            lineNumber: 389,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/AdminModal.tsx",
-                        lineNumber: 336,
+                        lineNumber: 381,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/AdminModal.tsx",
-                lineNumber: 322,
+                lineNumber: 367,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -896,7 +948,7 @@ function AdminModal() {
                                     }
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                    lineNumber: 375,
+                                    lineNumber: 420,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -908,12 +960,12 @@ function AdminModal() {
                                                 className: "w-8 h-8"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/AdminModal.tsx",
-                                                lineNumber: 382,
+                                                lineNumber: 427,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 381,
+                                            lineNumber: 426,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -921,7 +973,7 @@ function AdminModal() {
                                             children: "Personal Codex"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 384,
+                                            lineNumber: 429,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -929,7 +981,7 @@ function AdminModal() {
                                             children: "The Master Atelier"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 387,
+                                            lineNumber: 432,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -937,13 +989,13 @@ function AdminModal() {
                                             children: "Provide master passcode to open folios and edit all site copy, projects, and AI documents."
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 390,
+                                            lineNumber: 435,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                    lineNumber: 380,
+                                    lineNumber: 425,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -959,7 +1011,7 @@ function AdminModal() {
                                             autoFocus: true
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 396,
+                                            lineNumber: 441,
                                             columnNumber: 17
                                         }, this),
                                         error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -967,7 +1019,7 @@ function AdminModal() {
                                             children: "Authentication invalid."
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 404,
+                                            lineNumber: 449,
                                             columnNumber: 27
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -976,13 +1028,13 @@ function AdminModal() {
                                             children: "Turn & Open Book"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 406,
+                                            lineNumber: 451,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                    lineNumber: 395,
+                                    lineNumber: 440,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -994,20 +1046,20 @@ function AdminModal() {
                                             children: "fiker4620"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 415,
+                                            lineNumber: 460,
                                             columnNumber: 26
                                         }, this),
                                         " • Click to open"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                    lineNumber: 414,
+                                    lineNumber: 459,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, "closed-book", true, {
                             fileName: "[project]/src/components/AdminModal.tsx",
-                            lineNumber: 357,
+                            lineNumber: 402,
                             columnNumber: 13
                         }, this),
                         spread > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -1037,7 +1089,7 @@ function AdminModal() {
                                     }
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                    lineNumber: 435,
+                                    lineNumber: 480,
                                     columnNumber: 15
                                 }, this),
                                 isFlipping && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -1075,7 +1127,7 @@ function AdminModal() {
                                                     children: "✦"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 460,
+                                                    lineNumber: 505,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1083,13 +1135,13 @@ function AdminModal() {
                                                     children: "Turning Folio..."
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 461,
+                                                    lineNumber: 506,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 456,
+                                            lineNumber: 501,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1105,7 +1157,7 @@ function AdminModal() {
                                                     children: "✦"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 467,
+                                                    lineNumber: 512,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1113,19 +1165,19 @@ function AdminModal() {
                                                     children: "Opening Folio..."
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 468,
+                                                    lineNumber: 513,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 463,
+                                            lineNumber: 508,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                    lineNumber: 445,
+                                    lineNumber: 490,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1147,7 +1199,7 @@ function AdminModal() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 482,
+                                                    lineNumber: 527,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1155,13 +1207,13 @@ function AdminModal() {
                                                     children: spread > 1 ? "◂ Turn Back" : "Book Spine Anchor"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 485,
+                                                    lineNumber: 530,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 478,
+                                            lineNumber: 523,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1181,7 +1233,7 @@ function AdminModal() {
                                                                             className: "w-4 h-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 499,
+                                                                            lineNumber: 544,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -1189,13 +1241,13 @@ function AdminModal() {
                                                                             children: "Active Atmosphere"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 500,
+                                                                            lineNumber: 545,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 498,
+                                                                    lineNumber: 543,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1214,7 +1266,7 @@ function AdminModal() {
                                                                                     }
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 516,
+                                                                                    lineNumber: 561,
                                                                                     columnNumber: 33
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1222,25 +1274,25 @@ function AdminModal() {
                                                                                     children: t.label
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 522,
+                                                                                    lineNumber: 567,
                                                                                     columnNumber: 33
                                                                                 }, this)
                                                                             ]
                                                                         }, t.id, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 506,
+                                                                            lineNumber: 551,
                                                                             columnNumber: 31
                                                                         }, this);
                                                                     })
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 502,
+                                                                    lineNumber: 547,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 497,
+                                                            lineNumber: 542,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1253,7 +1305,7 @@ function AdminModal() {
                                                                             className: "w-4 h-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 531,
+                                                                            lineNumber: 576,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -1261,13 +1313,13 @@ function AdminModal() {
                                                                             children: "Change Master Passcode"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 532,
+                                                                            lineNumber: 577,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 530,
+                                                                    lineNumber: 575,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1278,13 +1330,13 @@ function AdminModal() {
                                                                     placeholder: "Cipher..."
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 534,
+                                                                    lineNumber: 579,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 529,
+                                                            lineNumber: 574,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1297,7 +1349,7 @@ function AdminModal() {
                                                                             className: "w-4 h-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 545,
+                                                                            lineNumber: 590,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -1305,13 +1357,13 @@ function AdminModal() {
                                                                             children: "Hero Status & Badges"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 546,
+                                                                            lineNumber: 591,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 544,
+                                                                    lineNumber: 589,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1324,7 +1376,7 @@ function AdminModal() {
                                                                                     children: "Badge Text"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 550,
+                                                                                    lineNumber: 595,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1340,13 +1392,13 @@ function AdminModal() {
                                                                                     className: "w-full px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs text-[var(--color-text)] bg-transparent"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 551,
+                                                                                    lineNumber: 596,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 549,
+                                                                            lineNumber: 594,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1356,7 +1408,7 @@ function AdminModal() {
                                                                                     children: "Availability Label"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 559,
+                                                                                    lineNumber: 604,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1372,31 +1424,31 @@ function AdminModal() {
                                                                                     className: "w-full px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs text-[var(--color-text)] bg-transparent"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 560,
+                                                                                    lineNumber: 605,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 558,
+                                                                            lineNumber: 603,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 548,
+                                                                    lineNumber: 593,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 543,
+                                                            lineNumber: 588,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 496,
+                                                    lineNumber: 541,
                                                     columnNumber: 21
                                                 }, this),
                                                 spread === 2 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1414,7 +1466,7 @@ function AdminModal() {
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 576,
+                                                                    lineNumber: 621,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1430,19 +1482,19 @@ function AdminModal() {
                                                                                 "Next.js"
                                                                             ],
                                                                             mediaType: "image",
-                                                                            mediaUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+                                                                            mediaUrl: "",
                                                                             rotation360Images: [],
                                                                             liveUrl: "https://",
                                                                             githubUrl: "https://github.com",
                                                                             featured: true
                                                                         };
-                                                                        setFormData({
-                                                                            ...formData,
-                                                                            projects: [
-                                                                                newP,
-                                                                                ...formData.projects
-                                                                            ]
-                                                                        });
+                                                                        setFormData((prev)=>({
+                                                                                ...prev,
+                                                                                projects: [
+                                                                                    newP,
+                                                                                    ...prev.projects
+                                                                                ]
+                                                                            }));
                                                                         setSelectedProjectIndex(0);
                                                                     },
                                                                     className: "px-2.5 py-1 rounded-lg bg-[var(--color-primary)] text-[var(--color-bg)] text-xs font-bold flex items-center gap-1 hover:brightness-110",
@@ -1451,20 +1503,20 @@ function AdminModal() {
                                                                             className: "w-3.5 h-3.5"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 600,
+                                                                            lineNumber: 648,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         " Add Project"
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 579,
+                                                                    lineNumber: 624,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 575,
+                                                            lineNumber: 620,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1478,17 +1530,17 @@ function AdminModal() {
                                                                         children: p.title
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AdminModal.tsx",
-                                                                        lineNumber: 616,
+                                                                        lineNumber: 664,
                                                                         columnNumber: 29
                                                                     }, this)
                                                                 }, p.id, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 606,
+                                                                    lineNumber: 654,
                                                                     columnNumber: 27
                                                                 }, this))
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 604,
+                                                            lineNumber: 652,
                                                             columnNumber: 23
                                                         }, this),
                                                         formData.projects[selectedProjectIndex] && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1505,7 +1557,7 @@ function AdminModal() {
                                                                                     children: "Project Title"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 625,
+                                                                                    lineNumber: 673,
                                                                                     columnNumber: 31
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1524,13 +1576,13 @@ function AdminModal() {
                                                                                     className: "w-full px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs sm:text-sm font-bold text-[var(--color-text)] bg-transparent"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 626,
+                                                                                    lineNumber: 674,
                                                                                     columnNumber: 31
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 624,
+                                                                            lineNumber: 672,
                                                                             columnNumber: 29
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1549,18 +1601,18 @@ function AdminModal() {
                                                                                 className: "w-4 h-4"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                lineNumber: 647,
+                                                                                lineNumber: 695,
                                                                                 columnNumber: 31
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 637,
+                                                                            lineNumber: 685,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 623,
+                                                                    lineNumber: 671,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1573,7 +1625,7 @@ function AdminModal() {
                                                                                     children: "Tagline"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 653,
+                                                                                    lineNumber: 701,
                                                                                     columnNumber: 31
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1592,13 +1644,13 @@ function AdminModal() {
                                                                                     className: "w-full px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs font-mono text-[var(--color-primary)] bg-transparent"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 654,
+                                                                                    lineNumber: 702,
                                                                                     columnNumber: 31
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 652,
+                                                                            lineNumber: 700,
                                                                             columnNumber: 29
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1608,7 +1660,7 @@ function AdminModal() {
                                                                                     children: "Tech Tags"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 666,
+                                                                                    lineNumber: 714,
                                                                                     columnNumber: 31
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1627,19 +1679,19 @@ function AdminModal() {
                                                                                     className: "w-full px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs font-mono text-[var(--color-muted)] bg-transparent"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 667,
+                                                                                    lineNumber: 715,
                                                                                     columnNumber: 31
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 665,
+                                                                            lineNumber: 713,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 651,
+                                                                    lineNumber: 699,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1649,7 +1701,7 @@ function AdminModal() {
                                                                             children: "Architecture Summary"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 681,
+                                                                            lineNumber: 729,
                                                                             columnNumber: 29
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
@@ -1668,25 +1720,25 @@ function AdminModal() {
                                                                             className: "w-full px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs text-[var(--color-text)] resize-none leading-relaxed bg-transparent"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 682,
+                                                                            lineNumber: 730,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 680,
+                                                                    lineNumber: 728,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 622,
+                                                            lineNumber: 670,
                                                             columnNumber: 25
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 574,
+                                                    lineNumber: 619,
                                                     columnNumber: 21
                                                 }, this),
                                                 spread === 3 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1702,7 +1754,7 @@ function AdminModal() {
                                                                             className: "w-4 h-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 703,
+                                                                            lineNumber: 751,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -1714,13 +1766,13 @@ function AdminModal() {
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 704,
+                                                                            lineNumber: 752,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 702,
+                                                                    lineNumber: 750,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1733,13 +1785,13 @@ function AdminModal() {
                                                                                 "Skill Beta"
                                                                             ]
                                                                         };
-                                                                        setFormData({
-                                                                            ...formData,
-                                                                            skills: [
-                                                                                ...formData.skills || [],
-                                                                                newCategory
-                                                                            ]
-                                                                        });
+                                                                        setFormData((prev)=>({
+                                                                                ...prev,
+                                                                                skills: [
+                                                                                    ...prev.skills || [],
+                                                                                    newCategory
+                                                                                ]
+                                                                            }));
                                                                     },
                                                                     className: "px-2.5 py-1 rounded-lg bg-[var(--color-primary)] text-[var(--color-bg)] text-xs font-bold flex items-center gap-1 hover:brightness-110",
                                                                     children: [
@@ -1747,20 +1799,20 @@ function AdminModal() {
                                                                             className: "w-3.5 h-3.5"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 722,
+                                                                            lineNumber: 770,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         " Add Domain"
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 708,
+                                                                    lineNumber: 756,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 701,
+                                                            lineNumber: 749,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1788,7 +1840,7 @@ function AdminModal() {
                                                                                     placeholder: "Category Title"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 730,
+                                                                                    lineNumber: 778,
                                                                                     columnNumber: 31
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1806,18 +1858,18 @@ function AdminModal() {
                                                                                         className: "w-3.5 h-3.5"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                        lineNumber: 750,
+                                                                                        lineNumber: 798,
                                                                                         columnNumber: 33
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 741,
+                                                                                    lineNumber: 789,
                                                                                     columnNumber: 31
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 729,
+                                                                            lineNumber: 777,
                                                                             columnNumber: 29
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1838,29 +1890,29 @@ function AdminModal() {
                                                                                 placeholder: "Node.js, PostgreSQL, Docker..."
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                lineNumber: 755,
+                                                                                lineNumber: 803,
                                                                                 columnNumber: 31
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 754,
+                                                                            lineNumber: 802,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     ]
                                                                 }, cIdx, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 728,
+                                                                    lineNumber: 776,
                                                                     columnNumber: 27
                                                                 }, this))
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 726,
+                                                            lineNumber: 774,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 700,
+                                                    lineNumber: 748,
                                                     columnNumber: 21
                                                 }, this),
                                                 spread === 4 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1876,7 +1928,7 @@ function AdminModal() {
                                                                             className: "w-4 h-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 778,
+                                                                            lineNumber: 826,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -1884,13 +1936,13 @@ function AdminModal() {
                                                                             children: "Direct Contact Channels"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 779,
+                                                                            lineNumber: 827,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 777,
+                                                                    lineNumber: 825,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1898,7 +1950,7 @@ function AdminModal() {
                                                                     children: "Configure live phone numbers, transmission emails, and social handles displayed across the portfolio."
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 783,
+                                                                    lineNumber: 831,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1913,14 +1965,14 @@ function AdminModal() {
                                                                                             className: "w-3 h-3 text-[var(--color-primary)]"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 790,
+                                                                                            lineNumber: 838,
                                                                                             columnNumber: 31
                                                                                         }, this),
                                                                                         " Primary Email"
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 789,
+                                                                                    lineNumber: 837,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1937,13 +1989,13 @@ function AdminModal() {
                                                                                     placeholder: "fikiylkal@gmail.com"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 792,
+                                                                                    lineNumber: 840,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 788,
+                                                                            lineNumber: 836,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1955,14 +2007,14 @@ function AdminModal() {
                                                                                             className: "w-3 h-3 text-[var(--color-primary)]"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 803,
+                                                                                            lineNumber: 851,
                                                                                             columnNumber: 31
                                                                                         }, this),
                                                                                         " Phone / Call"
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 802,
+                                                                                    lineNumber: 850,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1979,13 +2031,13 @@ function AdminModal() {
                                                                                     placeholder: "+251 900 000 000"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 805,
+                                                                                    lineNumber: 853,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 801,
+                                                                            lineNumber: 849,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1997,14 +2049,14 @@ function AdminModal() {
                                                                                             className: "w-3 h-3 text-[var(--color-primary)]"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 816,
+                                                                                            lineNumber: 864,
                                                                                             columnNumber: 31
                                                                                         }, this),
                                                                                         " Telegram Handle"
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 815,
+                                                                                    lineNumber: 863,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2021,13 +2073,13 @@ function AdminModal() {
                                                                                     placeholder: "https://t.me/..."
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 818,
+                                                                                    lineNumber: 866,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 814,
+                                                                            lineNumber: 862,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2039,14 +2091,14 @@ function AdminModal() {
                                                                                             className: "w-3 h-3 text-[var(--color-primary)]"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 829,
+                                                                                            lineNumber: 877,
                                                                                             columnNumber: 31
                                                                                         }, this),
                                                                                         " Instagram Link"
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 828,
+                                                                                    lineNumber: 876,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2063,25 +2115,25 @@ function AdminModal() {
                                                                                     placeholder: "https://instagram.com/..."
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 831,
+                                                                                    lineNumber: 879,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 827,
+                                                                            lineNumber: 875,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 787,
+                                                                    lineNumber: 835,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 776,
+                                                            lineNumber: 824,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2093,7 +2145,7 @@ function AdminModal() {
                                                                         className: "w-4 h-4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AdminModal.tsx",
-                                                                        lineNumber: 845,
+                                                                        lineNumber: 893,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -2105,18 +2157,18 @@ function AdminModal() {
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/components/AdminModal.tsx",
-                                                                        lineNumber: 846,
+                                                                        lineNumber: 894,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AdminModal.tsx",
-                                                                lineNumber: 844,
+                                                                lineNumber: 892,
                                                                 columnNumber: 25
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 843,
+                                                            lineNumber: 891,
                                                             columnNumber: 23
                                                         }, this),
                                                         !data.messages || data.messages.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2124,7 +2176,7 @@ function AdminModal() {
                                                             children: "No transmissions received yet. Inquiries will arrive here in real-time."
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 853,
+                                                            lineNumber: 901,
                                                             columnNumber: 25
                                                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                             className: "flex flex-col gap-2 max-h-[200px] overflow-y-auto book-scroll pr-1",
@@ -2142,7 +2194,7 @@ function AdminModal() {
                                                                                             children: m.name
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 862,
+                                                                                            lineNumber: 910,
                                                                                             columnNumber: 35
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2154,13 +2206,13 @@ function AdminModal() {
                                                                                             ]
                                                                                         }, void 0, true, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 863,
+                                                                                            lineNumber: 911,
                                                                                             columnNumber: 35
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 861,
+                                                                                    lineNumber: 909,
                                                                                     columnNumber: 33
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2172,18 +2224,18 @@ function AdminModal() {
                                                                                         className: "w-3.5 h-3.5"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                        lineNumber: 871,
+                                                                                        lineNumber: 919,
                                                                                         columnNumber: 35
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 865,
+                                                                                    lineNumber: 913,
                                                                                     columnNumber: 33
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 860,
+                                                                            lineNumber: 908,
                                                                             columnNumber: 31
                                                                         }, this),
                                                                         m.subject && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2191,7 +2243,7 @@ function AdminModal() {
                                                                             children: m.subject
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 874,
+                                                                            lineNumber: 922,
                                                                             columnNumber: 45
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2199,7 +2251,7 @@ function AdminModal() {
                                                                             children: m.message
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 875,
+                                                                            lineNumber: 923,
                                                                             columnNumber: 31
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2212,14 +2264,14 @@ function AdminModal() {
                                                                                             className: "w-3 h-3 text-[var(--color-primary)]"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 880,
+                                                                                            lineNumber: 928,
                                                                                             columnNumber: 35
                                                                                         }, this),
                                                                                         new Date(m.createdAt).toLocaleDateString()
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 879,
+                                                                                    lineNumber: 927,
                                                                                     columnNumber: 33
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
@@ -2228,36 +2280,36 @@ function AdminModal() {
                                                                                     children: "Reply via Email"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 883,
+                                                                                    lineNumber: 931,
                                                                                     columnNumber: 33
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 878,
+                                                                            lineNumber: 926,
                                                                             columnNumber: 31
                                                                         }, this)
                                                                     ]
                                                                 }, m.id, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 859,
+                                                                    lineNumber: 907,
                                                                     columnNumber: 29
                                                                 }, this))
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 857,
+                                                            lineNumber: 905,
                                                             columnNumber: 25
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 775,
+                                                    lineNumber: 823,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 490,
+                                            lineNumber: 535,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2271,14 +2323,14 @@ function AdminModal() {
                                                             className: "w-3.5 h-3.5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 903,
+                                                            lineNumber: 951,
                                                             columnNumber: 61
                                                         }, this),
                                                         " Turn Back"
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 903,
+                                                    lineNumber: 951,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2288,19 +2340,19 @@ function AdminModal() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 904,
+                                                    lineNumber: 952,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 899,
+                                            lineNumber: 947,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                    lineNumber: 474,
+                                    lineNumber: 519,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2318,7 +2370,7 @@ function AdminModal() {
                                                     children: spread < 4 ? "Turn Forward ▸" : "Final Leaf"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 917,
+                                                    lineNumber: 965,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2330,13 +2382,13 @@ function AdminModal() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 920,
+                                                    lineNumber: 968,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 913,
+                                            lineNumber: 961,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2353,7 +2405,7 @@ function AdminModal() {
                                                                     children: "Display Name"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 933,
+                                                                    lineNumber: 981,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2369,13 +2421,13 @@ function AdminModal() {
                                                                     className: "w-full px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs sm:text-sm font-bold text-[var(--color-primary)] font-serif bg-transparent"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 934,
+                                                                    lineNumber: 982,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 932,
+                                                            lineNumber: 980,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2385,7 +2437,7 @@ function AdminModal() {
                                                                     children: "Headline"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 942,
+                                                                    lineNumber: 990,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2401,13 +2453,13 @@ function AdminModal() {
                                                                     className: "w-full px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs sm:text-sm font-serif text-[var(--color-text)] font-bold bg-transparent"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 943,
+                                                                    lineNumber: 991,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 941,
+                                                            lineNumber: 989,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2417,7 +2469,7 @@ function AdminModal() {
                                                                     children: "Subheadline"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 951,
+                                                                    lineNumber: 999,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2433,13 +2485,13 @@ function AdminModal() {
                                                                     className: "w-full px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs text-[var(--color-text)] bg-transparent"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 952,
+                                                                    lineNumber: 1000,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 950,
+                                                            lineNumber: 998,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2449,7 +2501,7 @@ function AdminModal() {
                                                                     children: "Biography"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 960,
+                                                                    lineNumber: 1008,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
@@ -2465,102 +2517,285 @@ function AdminModal() {
                                                                     className: "w-full px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs text-[var(--color-text)] resize-none leading-relaxed bg-transparent"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 961,
+                                                                    lineNumber: 1009,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 959,
+                                                            lineNumber: 1007,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                            className: "p-3.5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col gap-2.5",
                                                             children: [
-                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
-                                                                    className: "block text-[10px] font-mono uppercase text-[var(--color-muted)] mb-1",
-                                                                    children: "Hero Portrait Asset"
-                                                                }, void 0, false, {
-                                                                    fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 971,
-                                                                    columnNumber: 25
-                                                                }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                    className: "flex gap-2",
+                                                                    className: "flex items-center justify-between",
                                                                     children: [
-                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                                                            type: "text",
-                                                                            value: formData.hero.avatarUrl,
-                                                                            onChange: (e)=>setFormData({
-                                                                                    ...formData,
-                                                                                    hero: {
-                                                                                        ...formData.hero,
-                                                                                        avatarUrl: e.target.value
-                                                                                    }
-                                                                                }),
-                                                                            className: "flex-1 px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs font-mono text-[var(--color-text)] bg-transparent",
-                                                                            placeholder: "Image URL or upload..."
-                                                                        }, void 0, false, {
-                                                                            fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 973,
-                                                                            columnNumber: 27
-                                                                        }, this),
-                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
-                                                                            className: "cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-primary)] text-xs text-[var(--color-primary)] font-bold hover:bg-[var(--color-primary)] hover:text-[var(--color-bg)] transition-all",
+                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                            className: "text-[10px] font-mono uppercase tracking-wider text-[var(--color-primary)] font-bold flex items-center gap-1.5",
                                                                             children: [
-                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$upload$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Upload$3e$__["Upload"], {
+                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$rotate$2d$cw$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RotateCw$3e$__["RotateCw"], {
                                                                                     className: "w-3.5 h-3.5"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 981,
+                                                                                    lineNumber: 1021,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                                    children: "Upload"
-                                                                                }, void 0, false, {
+                                                                                    children: [
+                                                                                        "Hero 360° Perspectives (",
+                                                                                        formData.hero.rotation360Images?.length || (formData.hero.avatarUrl ? 1 : 0),
+                                                                                        " frames)"
+                                                                                    ]
+                                                                                }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 982,
-                                                                                    columnNumber: 29
-                                                                                }, this),
-                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                                                                    type: "file",
-                                                                                    accept: "image/*",
-                                                                                    className: "hidden",
-                                                                                    onChange: (e)=>handleFileUpload(e, (dataUrl)=>{
-                                                                                            setFormData({
-                                                                                                ...formData,
-                                                                                                hero: {
-                                                                                                    ...formData.hero,
-                                                                                                    avatarUrl: dataUrl
-                                                                                                }
-                                                                                            });
-                                                                                        })
-                                                                                }, void 0, false, {
-                                                                                    fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 983,
+                                                                                    lineNumber: 1022,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 980,
+                                                                            lineNumber: 1020,
+                                                                            columnNumber: 27
+                                                                        }, this),
+                                                                        (formData.hero.rotation360Images?.length || 0) > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                                            type: "button",
+                                                                            onClick: ()=>{
+                                                                                setFormData((prev)=>({
+                                                                                        ...prev,
+                                                                                        hero: {
+                                                                                            ...prev.hero,
+                                                                                            rotation360Images: []
+                                                                                        }
+                                                                                    }));
+                                                                            },
+                                                                            className: "text-[10px] font-mono text-red-400 hover:underline",
+                                                                            children: "Clear Frames"
+                                                                        }, void 0, false, {
+                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                            lineNumber: 1025,
+                                                                            columnNumber: 29
+                                                                        }, this)
+                                                                    ]
+                                                                }, void 0, true, {
+                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                    lineNumber: 1019,
+                                                                    columnNumber: 25
+                                                                }, this),
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                                    className: "text-[10px] text-[var(--color-muted)] leading-tight",
+                                                                    children: "Upload multiple photos for your Hero avatar. Visitors will be able to scrub and view your portrait in 360°!"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                    lineNumber: 1040,
+                                                                    columnNumber: 25
+                                                                }, this),
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                    className: "flex gap-2 items-center flex-wrap",
+                                                                    children: [
+                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                                            className: "cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--color-primary)] text-[var(--color-bg)] text-xs font-bold hover:brightness-110 transition-all shadow-sm",
+                                                                            children: [
+                                                                                uploadingHero360 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                                                    children: [
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__["Loader2"], {
+                                                                                            className: "w-3.5 h-3.5 animate-spin"
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1048,
+                                                                                            columnNumber: 33
+                                                                                        }, this),
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                            children: "Uploading to Cloudinary..."
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1049,
+                                                                                            columnNumber: 33
+                                                                                        }, this)
+                                                                                    ]
+                                                                                }, void 0, true, {
+                                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                    lineNumber: 1047,
+                                                                                    columnNumber: 31
+                                                                                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                                                    children: [
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$upload$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Upload$3e$__["Upload"], {
+                                                                                            className: "w-3.5 h-3.5"
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1053,
+                                                                                            columnNumber: 33
+                                                                                        }, this),
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                            children: "Upload Multiple 360° Frames"
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1054,
+                                                                                            columnNumber: 33
+                                                                                        }, this)
+                                                                                    ]
+                                                                                }, void 0, true, {
+                                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                    lineNumber: 1052,
+                                                                                    columnNumber: 31
+                                                                                }, this),
+                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                                                    type: "file",
+                                                                                    accept: "image/*",
+                                                                                    multiple: true,
+                                                                                    disabled: uploadingHero360,
+                                                                                    className: "hidden",
+                                                                                    onChange: handleHero360Upload
+                                                                                }, void 0, false, {
+                                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                    lineNumber: 1057,
+                                                                                    columnNumber: 29
+                                                                                }, this)
+                                                                            ]
+                                                                        }, void 0, true, {
+                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                            lineNumber: 1045,
+                                                                            columnNumber: 27
+                                                                        }, this),
+                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                                            className: "cursor-pointer inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-[10px] font-mono text-[var(--color-text)] hover:border-[var(--color-primary)]",
+                                                                            children: [
+                                                                                uploadingHeroSingle ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                                                    children: [
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__["Loader2"], {
+                                                                                            className: "w-3 h-3 animate-spin text-[var(--color-primary)]"
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1070,
+                                                                                            columnNumber: 33
+                                                                                        }, this),
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                            children: "Uploading..."
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1071,
+                                                                                            columnNumber: 33
+                                                                                        }, this)
+                                                                                    ]
+                                                                                }, void 0, true, {
+                                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                    lineNumber: 1069,
+                                                                                    columnNumber: 31
+                                                                                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                                                    children: [
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$image$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Image$3e$__["Image"], {
+                                                                                            className: "w-3 h-3 text-[var(--color-primary)]"
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1075,
+                                                                                            columnNumber: 33
+                                                                                        }, this),
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                            children: "Single Avatar"
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1076,
+                                                                                            columnNumber: 33
+                                                                                        }, this)
+                                                                                    ]
+                                                                                }, void 0, true, {
+                                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                    lineNumber: 1074,
+                                                                                    columnNumber: 31
+                                                                                }, this),
+                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                                                    type: "file",
+                                                                                    accept: "image/*",
+                                                                                    disabled: uploadingHeroSingle,
+                                                                                    className: "hidden",
+                                                                                    onChange: handleHeroSingleUpload
+                                                                                }, void 0, false, {
+                                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                    lineNumber: 1079,
+                                                                                    columnNumber: 29
+                                                                                }, this)
+                                                                            ]
+                                                                        }, void 0, true, {
+                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                            lineNumber: 1067,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 972,
+                                                                    lineNumber: 1044,
                                                                     columnNumber: 25
+                                                                }, this),
+                                                                formData.hero.rotation360Images && formData.hero.rotation360Images.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                    className: "flex gap-1.5 overflow-x-auto py-1 book-scroll",
+                                                                    children: formData.hero.rotation360Images.map((imgUrl, i)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                            className: "relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-[var(--color-border)] group",
+                                                                            children: [
+                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                                                                                    src: imgUrl,
+                                                                                    alt: `Hero frame ${i + 1}`,
+                                                                                    className: "w-full h-full object-cover"
+                                                                                }, void 0, false, {
+                                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                    lineNumber: 1094,
+                                                                                    columnNumber: 33
+                                                                                }, this),
+                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                    className: "absolute bottom-0 right-0 bg-black/75 text-[8px] font-mono px-1 text-white",
+                                                                                    children: i + 1
+                                                                                }, void 0, false, {
+                                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                    lineNumber: 1095,
+                                                                                    columnNumber: 33
+                                                                                }, this),
+                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                                                    type: "button",
+                                                                                    onClick: ()=>{
+                                                                                        const filtered = (formData.hero.rotation360Images || []).filter((_, idx)=>idx !== i);
+                                                                                        setFormData((prev)=>({
+                                                                                                ...prev,
+                                                                                                hero: {
+                                                                                                    ...prev.hero,
+                                                                                                    rotation360Images: filtered,
+                                                                                                    avatarUrl: filtered[0] || ""
+                                                                                                }
+                                                                                            }));
+                                                                                    },
+                                                                                    className: "absolute top-0 right-0 p-0.5 bg-red-600/90 text-white opacity-0 group-hover:opacity-100 transition-opacity",
+                                                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$x$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__X$3e$__["X"], {
+                                                                                        className: "w-2.5 h-2.5"
+                                                                                    }, void 0, false, {
+                                                                                        fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                        lineNumber: 1113,
+                                                                                        columnNumber: 35
+                                                                                    }, this)
+                                                                                }, void 0, false, {
+                                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                    lineNumber: 1098,
+                                                                                    columnNumber: 33
+                                                                                }, this)
+                                                                            ]
+                                                                        }, i, true, {
+                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                            lineNumber: 1093,
+                                                                            columnNumber: 31
+                                                                        }, this))
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/src/components/AdminModal.tsx",
+                                                                    lineNumber: 1091,
+                                                                    columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 970,
+                                                            lineNumber: 1018,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 931,
+                                                    lineNumber: 979,
                                                     columnNumber: 21
                                                 }, this),
                                                 spread === 2 && formData.projects[selectedProjectIndex] && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2576,7 +2811,7 @@ function AdminModal() {
                                                                             children: "Live URL"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1005,
+                                                                            lineNumber: 1128,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2596,13 +2831,13 @@ function AdminModal() {
                                                                             placeholder: "https://..."
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1006,
+                                                                            lineNumber: 1129,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1004,
+                                                                    lineNumber: 1127,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2612,7 +2847,7 @@ function AdminModal() {
                                                                             children: "GitHub URL"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1019,
+                                                                            lineNumber: 1142,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2632,19 +2867,19 @@ function AdminModal() {
                                                                             placeholder: "https://github.com/..."
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1020,
+                                                                            lineNumber: 1143,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1018,
+                                                                    lineNumber: 1141,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 1003,
+                                                            lineNumber: 1126,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2660,51 +2895,49 @@ function AdminModal() {
                                                                                     className: "w-3.5 h-3.5"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1038,
+                                                                                    lineNumber: 1161,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                     children: [
                                                                                         "Project 360° Perspectives (",
-                                                                                        formData.projects[selectedProjectIndex].rotation360Images?.length || 1,
+                                                                                        formData.projects[selectedProjectIndex].rotation360Images?.length || (formData.projects[selectedProjectIndex].mediaUrl ? 1 : 0),
                                                                                         " frames)"
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1039,
+                                                                                    lineNumber: 1162,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1037,
+                                                                            lineNumber: 1160,
                                                                             columnNumber: 27
                                                                         }, this),
-                                                                        (formData.projects[selectedProjectIndex].rotation360Images?.length || 0) > 1 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                                        (formData.projects[selectedProjectIndex].rotation360Images?.length || 0) > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                                             type: "button",
                                                                             onClick: ()=>{
                                                                                 const up = [
                                                                                     ...formData.projects
                                                                                 ];
-                                                                                up[selectedProjectIndex].rotation360Images = [
-                                                                                    up[selectedProjectIndex].mediaUrl || ""
-                                                                                ];
+                                                                                up[selectedProjectIndex].rotation360Images = [];
                                                                                 setFormData({
                                                                                     ...formData,
                                                                                     projects: up
                                                                                 });
                                                                             },
                                                                             className: "text-[10px] font-mono text-red-400 hover:underline",
-                                                                            children: "Clear 360"
+                                                                            children: "Clear 360 Frames"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1042,
+                                                                            lineNumber: 1165,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1036,
+                                                                    lineNumber: 1159,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2712,7 +2945,7 @@ function AdminModal() {
                                                                     children: "Upload multiple perspective photos for this project. Visitors will be able to spin and view it in 360°!"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1056,
+                                                                    lineNumber: 1179,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2727,20 +2960,20 @@ function AdminModal() {
                                                                                             className: "w-3.5 h-3.5 animate-spin"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 1064,
+                                                                                            lineNumber: 1187,
                                                                                             columnNumber: 33
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                                            children: "Compressing Frames..."
+                                                                                            children: "Uploading to Cloudinary..."
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 1065,
+                                                                                            lineNumber: 1188,
                                                                                             columnNumber: 33
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1063,
+                                                                                    lineNumber: 1186,
                                                                                     columnNumber: 31
                                                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                                                                     children: [
@@ -2748,20 +2981,20 @@ function AdminModal() {
                                                                                             className: "w-3.5 h-3.5"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 1069,
+                                                                                            lineNumber: 1192,
                                                                                             columnNumber: 33
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                             children: "Upload Multiple 360° Frames"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 1070,
+                                                                                            lineNumber: 1193,
                                                                                             columnNumber: 33
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1068,
+                                                                                    lineNumber: 1191,
                                                                                     columnNumber: 31
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2773,64 +3006,82 @@ function AdminModal() {
                                                                                     onChange: handleProject360Upload
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1073,
+                                                                                    lineNumber: 1196,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1061,
+                                                                            lineNumber: 1184,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                                                             className: "cursor-pointer inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-[10px] font-mono text-[var(--color-text)] hover:border-[var(--color-primary)]",
                                                                             children: [
-                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$image$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Image$3e$__["Image"], {
-                                                                                    className: "w-3 h-3 text-[var(--color-primary)]"
-                                                                                }, void 0, false, {
+                                                                                uploadingSingle ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                                                    children: [
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__["Loader2"], {
+                                                                                            className: "w-3 h-3 animate-spin text-[var(--color-primary)]"
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1209,
+                                                                                            columnNumber: 33
+                                                                                        }, this),
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                            children: "Uploading..."
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1210,
+                                                                                            columnNumber: 33
+                                                                                        }, this)
+                                                                                    ]
+                                                                                }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1084,
-                                                                                    columnNumber: 29
-                                                                                }, this),
-                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                                    children: "Single Thumbnail"
-                                                                                }, void 0, false, {
+                                                                                    lineNumber: 1208,
+                                                                                    columnNumber: 31
+                                                                                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                                                    children: [
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$image$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Image$3e$__["Image"], {
+                                                                                            className: "w-3 h-3 text-[var(--color-primary)]"
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1214,
+                                                                                            columnNumber: 33
+                                                                                        }, this),
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                            children: "Single Thumbnail"
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/src/components/AdminModal.tsx",
+                                                                                            lineNumber: 1215,
+                                                                                            columnNumber: 33
+                                                                                        }, this)
+                                                                                    ]
+                                                                                }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1085,
-                                                                                    columnNumber: 29
+                                                                                    lineNumber: 1213,
+                                                                                    columnNumber: 31
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                                     type: "file",
                                                                                     accept: "image/*",
+                                                                                    disabled: uploadingSingle,
                                                                                     className: "hidden",
-                                                                                    onChange: (e)=>handleFileUpload(e, (dataUrl)=>{
-                                                                                            const up = [
-                                                                                                ...formData.projects
-                                                                                            ];
-                                                                                            up[selectedProjectIndex].mediaUrl = dataUrl;
-                                                                                            up[selectedProjectIndex].rotation360Images = [
-                                                                                                dataUrl
-                                                                                            ];
-                                                                                            setFormData({
-                                                                                                ...formData,
-                                                                                                projects: up
-                                                                                            });
-                                                                                        })
+                                                                                    onChange: handleSingleThumbnailUpload
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1086,
+                                                                                    lineNumber: 1218,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1083,
+                                                                            lineNumber: 1206,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1060,
+                                                                    lineNumber: 1183,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 formData.projects[selectedProjectIndex].rotation360Images && formData.projects[selectedProjectIndex].rotation360Images.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2844,7 +3095,7 @@ function AdminModal() {
                                                                                     className: "w-full h-full object-cover"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1105,
+                                                                                    lineNumber: 1233,
                                                                                     columnNumber: 33
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2852,7 +3103,7 @@ function AdminModal() {
                                                                                     children: i + 1
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1106,
+                                                                                    lineNumber: 1234,
                                                                                     columnNumber: 33
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2863,7 +3114,7 @@ function AdminModal() {
                                                                                         ];
                                                                                         const filtered = (up[selectedProjectIndex].rotation360Images || []).filter((_, idx)=>idx !== i);
                                                                                         up[selectedProjectIndex].rotation360Images = filtered;
-                                                                                        up[selectedProjectIndex].mediaUrl = filtered[0] || up[selectedProjectIndex].mediaUrl;
+                                                                                        up[selectedProjectIndex].mediaUrl = filtered[0] || "";
                                                                                         setFormData({
                                                                                             ...formData,
                                                                                             projects: up
@@ -2874,35 +3125,35 @@ function AdminModal() {
                                                                                         className: "w-2.5 h-2.5"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                        lineNumber: 1120,
+                                                                                        lineNumber: 1248,
                                                                                         columnNumber: 35
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1109,
+                                                                                    lineNumber: 1237,
                                                                                     columnNumber: 33
                                                                                 }, this)
                                                                             ]
                                                                         }, i, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1104,
+                                                                            lineNumber: 1232,
                                                                             columnNumber: 31
                                                                         }, this))
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1102,
+                                                                    lineNumber: 1230,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 1035,
+                                                            lineNumber: 1158,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 1002,
+                                                    lineNumber: 1125,
                                                     columnNumber: 21
                                                 }, this),
                                                 spread === 3 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2917,7 +3168,7 @@ function AdminModal() {
                                                                         className: "w-4 h-4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AdminModal.tsx",
-                                                                        lineNumber: 1135,
+                                                                        lineNumber: 1263,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -2925,13 +3176,13 @@ function AdminModal() {
                                                                         children: "GitHub Username Handle"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/components/AdminModal.tsx",
-                                                                        lineNumber: 1136,
+                                                                        lineNumber: 1264,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/components/AdminModal.tsx",
-                                                                lineNumber: 1134,
+                                                                lineNumber: 1262,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2939,7 +3190,7 @@ function AdminModal() {
                                                                 children: "Provide your GitHub username to sync profile and repositories."
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/AdminModal.tsx",
-                                                                lineNumber: 1138,
+                                                                lineNumber: 1266,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2953,18 +3204,18 @@ function AdminModal() {
                                                                 placeholder: "GitHub Username"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/components/AdminModal.tsx",
-                                                                lineNumber: 1141,
+                                                                lineNumber: 1269,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/components/AdminModal.tsx",
-                                                        lineNumber: 1133,
+                                                        lineNumber: 1261,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 1132,
+                                                    lineNumber: 1260,
                                                     columnNumber: 21
                                                 }, this),
                                                 spread === 4 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2983,7 +3234,7 @@ function AdminModal() {
                                                                                     className: "w-4 h-4"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1158,
+                                                                                    lineNumber: 1286,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -2991,13 +3242,13 @@ function AdminModal() {
                                                                                     children: "AI Knowledge Base Document (PDF)"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1159,
+                                                                                    lineNumber: 1287,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1157,
+                                                                            lineNumber: 1285,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         formData.resumePdfName && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3005,13 +3256,13 @@ function AdminModal() {
                                                                             children: "Indexed"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1164,
+                                                                            lineNumber: 1292,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1156,
+                                                                    lineNumber: 1284,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3019,7 +3270,7 @@ function AdminModal() {
                                                                     children: "Upload your resume, CV, or detailed background document. The AI Assistant will ingest every page."
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1170,
+                                                                    lineNumber: 1298,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3034,20 +3285,20 @@ function AdminModal() {
                                                                                             className: "w-3.5 h-3.5 animate-spin"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 1178,
+                                                                                            lineNumber: 1306,
                                                                                             columnNumber: 33
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                             children: "Ingesting PDF..."
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 1179,
+                                                                                            lineNumber: 1307,
                                                                                             columnNumber: 33
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1177,
+                                                                                    lineNumber: 1305,
                                                                                     columnNumber: 31
                                                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                                                                     children: [
@@ -3055,20 +3306,20 @@ function AdminModal() {
                                                                                             className: "w-3.5 h-3.5"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 1183,
+                                                                                            lineNumber: 1311,
                                                                                             columnNumber: 33
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                             children: formData.resumePdfName ? "Replace PDF" : "Upload Background PDF"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                            lineNumber: 1184,
+                                                                                            lineNumber: 1312,
                                                                                             columnNumber: 33
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1182,
+                                                                                    lineNumber: 1310,
                                                                                     columnNumber: 31
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3079,13 +3330,13 @@ function AdminModal() {
                                                                                     onChange: handlePdfUpload
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1187,
+                                                                                    lineNumber: 1315,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1175,
+                                                                            lineNumber: 1303,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         formData.resumePdfName && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3096,13 +3347,13 @@ function AdminModal() {
                                                                             children: "Remove PDF"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1197,
+                                                                            lineNumber: 1325,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1174,
+                                                                    lineNumber: 1302,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 formData.resumePdfName && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3113,7 +3364,7 @@ function AdminModal() {
                                                                             children: formData.resumePdfName
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1210,
+                                                                            lineNumber: 1338,
                                                                             columnNumber: 32
                                                                         }, this),
                                                                         " ",
@@ -3121,7 +3372,7 @@ function AdminModal() {
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1209,
+                                                                    lineNumber: 1337,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 !formData.resumePdfName && pdfStats && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3129,13 +3380,13 @@ function AdminModal() {
                                                                     children: pdfStats
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1214,
+                                                                    lineNumber: 1342,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 1155,
+                                                            lineNumber: 1283,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3148,7 +3399,7 @@ function AdminModal() {
                                                                             className: "w-4 h-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1221,
+                                                                            lineNumber: 1349,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -3156,13 +3407,13 @@ function AdminModal() {
                                                                             children: "Contact Form Copy"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1222,
+                                                                            lineNumber: 1350,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1220,
+                                                                    lineNumber: 1348,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3175,7 +3426,7 @@ function AdminModal() {
                                                                                     children: "Heading"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1226,
+                                                                                    lineNumber: 1354,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3191,13 +3442,13 @@ function AdminModal() {
                                                                                     className: "w-full px-2.5 py-1.5 rounded-lg glass-panel border border-[var(--color-border)] text-xs text-[var(--color-text)] bg-transparent"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1227,
+                                                                                    lineNumber: 1355,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1225,
+                                                                            lineNumber: 1353,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3207,7 +3458,7 @@ function AdminModal() {
                                                                                     children: "Button Label"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1235,
+                                                                                    lineNumber: 1363,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3223,25 +3474,25 @@ function AdminModal() {
                                                                                     className: "w-full px-2.5 py-1.5 rounded-lg glass-panel border border-[var(--color-border)] text-xs text-[var(--color-text)] bg-transparent"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                                    lineNumber: 1236,
+                                                                                    lineNumber: 1364,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1234,
+                                                                            lineNumber: 1362,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1224,
+                                                                    lineNumber: 1352,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 1219,
+                                                            lineNumber: 1347,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3254,7 +3505,7 @@ function AdminModal() {
                                                                             className: "w-4 h-4"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1249,
+                                                                            lineNumber: 1377,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -3262,13 +3513,13 @@ function AdminModal() {
                                                                             children: "Gemini AI Persona Directives"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                                            lineNumber: 1250,
+                                                                            lineNumber: 1378,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1248,
+                                                                    lineNumber: 1376,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
@@ -3281,13 +3532,13 @@ function AdminModal() {
                                                                     className: "w-full px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs text-[var(--color-text)] resize-none leading-relaxed bg-transparent"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1252,
+                                                                    lineNumber: 1380,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 1247,
+                                                            lineNumber: 1375,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3299,111 +3550,112 @@ function AdminModal() {
                                                                     className: "w-4 h-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1266,
+                                                                    lineNumber: 1394,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                     children: "Inscribe & Bind Grimoire"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                                    lineNumber: 1267,
+                                                                    lineNumber: 1395,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 1261,
+                                                            lineNumber: 1389,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 1154,
+                                                    lineNumber: 1282,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 925,
+                                            lineNumber: 973,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            onClick: flipForward,
-                                            className: "pt-2 sm:pt-3 border-t border-[var(--color-border)] flex items-center justify-between text-[10px] sm:text-xs font-mono text-[var(--color-muted)] cursor-pointer hover:text-[var(--color-primary)] flex-shrink-0",
+                                            className: "pt-2 sm:pt-3 border-t border-[var(--color-border)] flex items-center justify-between text-[10px] sm:text-xs font-mono text-[var(--color-muted)] flex-shrink-0",
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    className: "flex items-center gap-1",
+                                                    onClick: flipForward,
+                                                    className: "flex items-center gap-1 cursor-pointer hover:text-[var(--color-primary)] transition-colors",
                                                     children: [
                                                         spread < 4 ? "Turn Forward" : "✦ Complete Edition",
                                                         spread < 4 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$right$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronRight$3e$__["ChevronRight"], {
                                                             className: "w-3.5 h-3.5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 1280,
+                                                            lineNumber: 1410,
                                                             columnNumber: 36
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 1278,
+                                                    lineNumber: 1405,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                                     type: "button",
                                                     onClick: handleSave,
-                                                    className: "text-[var(--color-primary)] font-bold hover:underline flex items-center gap-1",
+                                                    className: "text-[var(--color-primary)] font-bold hover:underline flex items-center gap-1.5 cursor-pointer bg-[var(--color-surface)] px-3 py-1 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-all",
+                                                    title: "Persist all changes directly to Upstash Redis Cloud",
                                                     children: [
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$save$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Save$3e$__["Save"], {
                                                             className: "w-3.5 h-3.5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                                            lineNumber: 1287,
+                                                            lineNumber: 1418,
                                                             columnNumber: 21
                                                         }, this),
-                                                        " Save"
+                                                        " Save & Sync"
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                                    lineNumber: 1282,
+                                                    lineNumber: 1412,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/components/AdminModal.tsx",
-                                            lineNumber: 1274,
+                                            lineNumber: 1402,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/AdminModal.tsx",
-                                    lineNumber: 909,
+                                    lineNumber: 957,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, "book-desk", true, {
                             fileName: "[project]/src/components/AdminModal.tsx",
-                            lineNumber: 422,
+                            lineNumber: 467,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/AdminModal.tsx",
-                    lineNumber: 353,
+                    lineNumber: 398,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/AdminModal.tsx",
-                lineNumber: 349,
+                lineNumber: 394,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/AdminModal.tsx",
-        lineNumber: 315,
+        lineNumber: 360,
         columnNumber: 5
     }, this);
 }
-_s(AdminModal, "WqnbFpr+ytzhCYay1xcy3+1GIDw=", false, function() {
+_s(AdminModal, "9i6v5omSyAlTwGiPkZwrCesnmdA=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$PortfolioContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePortfolio"]
     ];
@@ -3708,144 +3960,146 @@ var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.sign
 ;
 ;
 const PortfolioContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createContext"])(undefined);
-const STORAGE_KEY = "luxury_portfolio_data_v2";
+const STORAGE_KEY = "luxury_portfolio_data_v4";
 function PortfolioProvider({ children }) {
     _s();
-    const [data, setData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"]);
+    const [data, setData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({
+        "PortfolioProvider.useState": ()=>{
+            if ("TURBOPACK compile-time truthy", 1) {
+                try {
+                    const local = localStorage.getItem(STORAGE_KEY);
+                    if (local) {
+                        const parsed = JSON.parse(local);
+                        if (parsed && typeof parsed === "object") {
+                            return {
+                                ...__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"],
+                                ...parsed,
+                                hero: {
+                                    ...__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"].hero,
+                                    ...parsed.hero || {}
+                                },
+                                projects: Array.isArray(parsed.projects) ? parsed.projects : __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"].projects,
+                                skills: Array.isArray(parsed.skills) ? parsed.skills : __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"].skills
+                            };
+                        }
+                    }
+                } catch (e) {}
+            }
+            return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"];
+        }
+    }["PortfolioProvider.useState"]);
+    const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
     const [isAdminOpen, setIsAdminOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isAuthenticated, setIsAuthenticated] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const applyTheme = (theme)=>{
-        document.documentElement.setAttribute("data-theme", theme);
-        document.body.setAttribute("data-theme", theme);
+        if (typeof document !== "undefined") {
+            document.documentElement.setAttribute("data-theme", theme);
+            document.body.setAttribute("data-theme", theme);
+        }
     };
-    // Safe deep merger that prioritizes USER DATA over initialData
-    const mergeData = (incoming, fallback)=>{
-        if (!incoming || typeof incoming !== "object") return fallback;
-        return {
-            ...fallback,
-            ...incoming,
-            navbar: {
-                ...fallback.navbar,
-                ...incoming.navbar || {}
-            },
-            hero: {
-                ...fallback.hero,
-                ...incoming.hero || {},
-                rotation360Images: incoming?.hero?.rotation360Images?.length > 0 ? incoming.hero.rotation360Images : incoming?.hero?.avatarUrl ? [
-                    incoming.hero.avatarUrl
-                ] : fallback.hero.rotation360Images
-            },
-            // CRUCIAL: If incoming has projects, NEVER overwrite with fallback projects!
-            projects: Array.isArray(incoming.projects) && incoming.projects.length > 0 ? incoming.projects : fallback.projects,
-            skills: Array.isArray(incoming.skills) && incoming.skills.length > 0 ? incoming.skills : fallback.skills,
-            projectsCopy: {
-                ...fallback.projectsCopy,
-                ...incoming.projectsCopy || {}
-            },
-            skillsCopy: {
-                ...fallback.skillsCopy,
-                ...incoming.skillsCopy || {}
-            },
-            githubCopy: {
-                ...fallback.githubCopy,
-                ...incoming.githubCopy || {}
-            },
-            contactCopy: {
-                ...fallback.contactCopy,
-                ...incoming.contactCopy || {}
-            },
-            contact: {
-                ...fallback.contact,
-                ...incoming.contact || {}
-            },
-            aiCopy: {
-                ...fallback.aiCopy,
-                ...incoming.aiCopy || {}
-            },
-            messages: Array.isArray(incoming.messages) ? incoming.messages : fallback.messages || []
-        };
-    };
-    // 1. Initial Load
+    // Fetch true state from Redis on mount (READ-ONLY)
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "PortfolioProvider.useEffect": ()=>{
-            let currentBestData = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"];
-            // A. Read LocalStorage First
-            try {
-                const localRaw = localStorage.getItem(STORAGE_KEY);
-                if (localRaw) {
-                    const parsed = JSON.parse(localRaw);
-                    currentBestData = mergeData(parsed, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"]);
-                    setData(currentBestData);
-                    applyTheme(currentBestData.theme || "obsidian-gold");
-                    console.log("[PortfolioContext] Loaded from LocalStorage:", currentBestData);
-                } else {
-                    applyTheme(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"].theme || "obsidian-gold");
-                }
-            } catch (e) {
-                console.warn("[PortfolioContext] LocalStorage read failed:", e);
-            }
-            // B. Fetch from API (Cloud Database)
-            async function fetchCloudData() {
+            let isMounted = true;
+            async function loadFromCloud() {
                 try {
                     const res = await fetch(`/api/portfolio?t=${Date.now()}`, {
                         cache: "no-store",
                         headers: {
-                            Pragma: "no-cache"
+                            Pragma: "no-cache",
+                            "Cache-Control": "no-cache"
                         }
                     });
-                    if (!res.ok) return;
-                    const json = await res.json();
-                    if (json.success && json.data) {
-                        // If cloud has valid user data, merge it with current best data
-                        const cloudMerged = mergeData(json.data, currentBestData);
-                        setData(cloudMerged);
-                        applyTheme(cloudMerged.theme || "obsidian-gold");
-                        console.log("[PortfolioContext] Synced with Cloud DB:", cloudMerged);
-                        try {
-                            localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudMerged));
-                        } catch  {}
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (json.success && json.data && isMounted) {
+                            // Only update if Redis has real data
+                            if (json.source === "redis-cloud" || Array.isArray(json.data.projects)) {
+                                setData(json.data);
+                                if (json.data.theme) applyTheme(json.data.theme);
+                                try {
+                                    localStorage.setItem(STORAGE_KEY, JSON.stringify(json.data));
+                                } catch  {}
+                            }
+                        }
                     }
                 } catch (err) {
-                    console.warn("[PortfolioContext] Cloud fetch error:", err);
+                    console.warn("[PortfolioContext] Load error:", err);
+                } finally{
+                    if (isMounted) setIsLoading(false);
                 }
             }
-            fetchCloudData();
+            loadFromCloud();
+            return ({
+                "PortfolioProvider.useEffect": ()=>{
+                    isMounted = false;
+                }
+            })["PortfolioProvider.useEffect"];
         }
     }["PortfolioProvider.useEffect"], []);
-    // 2. Save Data Function
-    const updateData = async (newData)=>{
-        let updatedPayload = {
-            ...data,
-            ...newData
-        };
-        setData((prev)=>{
-            updatedPayload = mergeData(newData, prev);
-            return updatedPayload;
-        });
-        applyTheme(updatedPayload.theme || "obsidian-gold");
-        // A. Always save to LocalStorage immediately
+    // updateData NEVER calls the remote API unless syncToCloud is explicitly true!
+    const updateData = async (newData, syncToCloud = false)=>{
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPayload));
-            console.log("[PortfolioContext] Successfully saved to LocalStorage:", updatedPayload);
-        } catch (e) {
-            console.warn("[PortfolioContext] LocalStorage quota exceeded:", e);
-        }
-        // B. Push to Server / Cloud Database
-        try {
+            const merged = {
+                ...data,
+                ...newData,
+                theme: newData.theme || data.theme || "obsidian-gold",
+                adminPasscode: newData.adminPasscode || data.adminPasscode || "fiker4620",
+                hero: {
+                    ...data?.hero || __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"].hero,
+                    ...newData?.hero || {}
+                },
+                contact: {
+                    ...data?.contact || __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"].contact,
+                    ...newData?.contact || {}
+                },
+                contactCopy: {
+                    ...data?.contactCopy || __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"].contactCopy,
+                    ...newData?.contactCopy || {}
+                },
+                projectsCopy: {
+                    ...data?.projectsCopy || __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"].projectsCopy,
+                    ...newData?.projectsCopy || {}
+                },
+                skillsCopy: {
+                    ...data?.skillsCopy || __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"].skillsCopy,
+                    ...newData?.skillsCopy || {}
+                },
+                projects: Array.isArray(newData.projects) ? newData.projects : data.projects || __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"].projects,
+                skills: Array.isArray(newData.skills) ? newData.skills : data.skills || __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"].skills,
+                messages: Array.isArray(newData.messages) ? newData.messages : data.messages || []
+            };
+            // 1. Always update client state immediately
+            setData(merged);
+            if ("TURBOPACK compile-time truthy", 1) applyTheme(merged.theme);
+            // 2. Cache in localStorage immediately
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+            } catch (e) {}
+            // 3. STOP! If this is an internal component update, DO NOT POST TO REDIS!
+            if (!syncToCloud) {
+                return true;
+            }
+            // 4. ONLY send a POST when explicitly told to sync (Save & Sync button)
+            console.log("[PortfolioContext] User triggered explicit cloud sync...");
             const res = await fetch("/api/portfolio", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(updatedPayload)
+                body: JSON.stringify(merged)
             });
-            const json = await res.json();
-            console.log("[PortfolioContext] Server save response:", json);
+            const rawText = await res.text();
+            let json = {};
+            try {
+                json = JSON.parse(rawText);
+            } catch  {
+                return res.ok;
+            }
             return json.success === true;
         } catch (err) {
-            console.error("[PortfolioContext] Cloud save network failure:", err);
-            // Even if network fails, user data is safe in localStorage
-            return true;
+            console.error("[PortfolioContext] Update error:", err);
+            return false;
         }
     };
     const addMessage = (msg)=>{
@@ -3861,20 +4115,20 @@ function PortfolioProvider({ children }) {
         ];
         updateData({
             messages: updatedMessages
-        });
+        }, true); // messages can sync
         return newMessage;
     };
     const deleteMessage = (id)=>{
         const updated = (data.messages || []).filter((m)=>m.id !== id);
         updateData({
             messages: updated
-        });
+        }, true);
     };
     const setTheme = (theme)=>{
         applyTheme(theme);
         updateData({
             theme
-        });
+        }, false); // Do not blast Redis on theme preview
     };
     const resetData = ()=>{
         setData(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$data$2f$initialData$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["initialData"]);
@@ -3895,16 +4149,17 @@ function PortfolioProvider({ children }) {
             isAuthenticated,
             setIsAuthenticated,
             activeTheme: data.theme,
-            setTheme
+            setTheme,
+            isLoading
         },
         children: children
     }, void 0, false, {
         fileName: "[project]/src/context/PortfolioContext.tsx",
-        lineNumber: 184,
+        lineNumber: 182,
         columnNumber: 5
     }, this);
 }
-_s(PortfolioProvider, "yCZHudmwO2oXJ7hYssU8fNAc3fg=");
+_s(PortfolioProvider, "0/03GzkI/DUAT8ODzQf/tKU1hyM=");
 _c = PortfolioProvider;
 function usePortfolio() {
     _s1();
@@ -3976,8 +4231,10 @@ const initialData = {
                 "Next.js"
             ],
             mediaType: "image",
-            mediaUrl: "",
-            rotation360Images: [],
+            mediaUrl: "https://res.cloudinary.com/nytwathq/image/upload/v1791700627/portfolio_assets/e0flv8sfnf18n5a5h26i.jpg",
+            rotation360Images: [
+                "https://res.cloudinary.com/nytwathq/image/upload/v1791700627/portfolio_assets/e0flv8sfnf18n5a5h26i.jpg"
+            ],
             liveUrl: "https://",
             githubUrl: "https://github.com/Fonkaa",
             featured: true

@@ -12,7 +12,6 @@ import {
   Phone, Send as TelegramIcon, RotateCw, Image as ImageIcon
 } from "lucide-react";
 
-// Inline Instagram SVG component to prevent missing lucide icon exports
 function InstagramIcon({ className = "w-3 h-3" }: { className?: string }) {
   return (
     <svg 
@@ -56,20 +55,25 @@ export default function AdminModal() {
 
   const [formData, setFormData] = useState(data);
 
-  // PDF Parsing & Telemetry States
   const [parsingPdf, setParsingPdf] = useState(false);
   const [pdfStats, setPdfStats] = useState<string | null>(null);
 
-  // Multi-frame project upload state
+  // Uploader progress states
+  const [uploadingHero360, setUploadingHero360] = useState(false);
+  const [uploadingHeroSingle, setUploadingHeroSingle] = useState(false);
   const [uploadingProject360, setUploadingProject360] = useState(false);
+  const [uploadingSingle, setUploadingSingle] = useState(false);
 
+  // Sync draft data ONLY when opening the modal
   React.useEffect(() => {
-    setFormData(data);
-    setNewPasscode(data.adminPasscode || "fiker4620");
-    if (data.resumePdfText) {
-      setPdfStats(`Indexed document (${data.resumePdfText.length} characters)`);
+    if (isAdminOpen) {
+      setFormData(data);
+      setNewPasscode(data.adminPasscode || "fiker4620");
+      if (data.resumePdfText) {
+        setPdfStats(`Indexed document (${data.resumePdfText.length} characters)`);
+      }
     }
-  }, [data, isAdminOpen]);
+  }, [isAdminOpen]);
 
   if (!isAdminOpen) return null;
 
@@ -86,101 +90,113 @@ export default function AdminModal() {
     }
   };
 
-  // Canvas Image Compression Helper (~70KB - 130KB per frame)
- const compressImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 600;
-          const MAX_HEIGHT = 600;
-          let width = img.width;
-          let height = img.height;
+  const uploadFileToCloud = async (file: File): Promise<string | null> => {
+    try {
+      const body = new FormData();
+      body.append("file", file);
 
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body,
+      });
 
-          canvas.width = Math.round(width);
-          canvas.height = Math.round(height);
-          const ctx = canvas.getContext("2d");
-          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-          // 50% WebP quality keeps each frame at only ~25-35KB
-          resolve(canvas.toDataURL("image/webp", 0.5));
-        };
-        img.onerror = reject;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+      const json = await res.json();
+      if (json.success && json.url) {
+        return json.url;
+      }
+      console.error("[UPLOAD FAILED]:", json.error);
+      return null;
+    } catch (err) {
+      console.error("[UPLOAD NETWORK ERROR]:", err);
+      return null;
+    }
   };
 
-  // Single File Upload
-  const handleFileUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onComplete: (dataUrl: string, type: "image" | "video") => void
-  ) => {
+  // Hero: Upload Multiple 360° Frames
+  const handleHero360Upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingHero360(true);
+    try {
+      const fileList = Array.from(files).filter((f) => f.type.startsWith("image/"));
+      const uploadedUrls: string[] = [];
+
+      for (const file of fileList) {
+        const url = await uploadFileToCloud(file);
+        if (url) uploadedUrls.push(url);
+      }
+
+      if (uploadedUrls.length > 0) {
+        setFormData((prev) => {
+          const existing = Array.isArray(prev.hero.rotation360Images) ? prev.hero.rotation360Images : [];
+          const combined = [...existing, ...uploadedUrls];
+          return {
+            ...prev,
+            hero: {
+              ...prev.hero,
+              avatarUrl: combined[0] || prev.hero.avatarUrl,
+              rotation360Images: combined,
+            },
+          };
+        });
+      }
+    } finally {
+      e.target.value = "";
+      setUploadingHero360(false);
+    }
+  };
+
+  // Hero: Upload Single Avatar
+  const handleHeroSingleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.type.startsWith("video")) {
-      alert("Please provide an external URL for videos.");
-      return;
-    }
-
+    setUploadingHeroSingle(true);
     try {
-      const compressed = await compressImage(file);
-      onComplete(compressed, "image");
-    } catch (err) {
-      console.error("Compression error:", err);
+      const url = await uploadFileToCloud(file);
+      if (url) {
+        setFormData((prev) => ({
+          ...prev,
+          hero: {
+            ...prev.hero,
+            avatarUrl: url,
+            rotation360Images: [url],
+          },
+        }));
+      }
     } finally {
       e.target.value = "";
+      setUploadingHeroSingle(false);
     }
   };
 
-  // Batch Upload 360° Frames for Currently Selected Project
+  // Project: Upload Multiple 360° Frames
   const handleProject360Upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setUploadingProject360(true);
     try {
-      const fileList = Array.from(files);
-      const compressedBatch: string[] = [];
+      const fileList = Array.from(files).filter((f) => f.type.startsWith("image/"));
+      const uploadedUrls: string[] = [];
 
       for (const file of fileList) {
-        if (!file.type.startsWith("image/")) continue;
-        try {
-          const comp = await compressImage(file);
-          if (comp) compressedBatch.push(comp);
-        } catch (compErr) {
-          console.warn("Frame compression failure:", file.name, compErr);
-        }
+        const url = await uploadFileToCloud(file);
+        if (url) uploadedUrls.push(url);
       }
 
-      if (compressedBatch.length > 0) {
+      if (uploadedUrls.length > 0) {
         setFormData((prev) => {
           const upProjects = [...prev.projects];
           const target = upProjects[selectedProjectIndex];
           if (!target) return prev;
 
-          const currentFrames = Array.isArray(target.rotation360Images) && target.rotation360Images.length > 0
+          const existingFrames = Array.isArray(target.rotation360Images) && target.rotation360Images.length > 0
             ? target.rotation360Images
-            : [target.mediaUrl].filter(Boolean) as string[];
+            : (target.mediaUrl && !target.mediaUrl.includes("unsplash") ? [target.mediaUrl] : []);
 
-          const combined = [...currentFrames, ...compressedBatch];
+          const combined = [...existingFrames, ...uploadedUrls];
 
           upProjects[selectedProjectIndex] = {
             ...target,
@@ -191,15 +207,41 @@ export default function AdminModal() {
           return { ...prev, projects: upProjects };
         });
       }
-    } catch (err) {
-      console.error("Project 360 upload processing error:", err);
     } finally {
       e.target.value = "";
       setUploadingProject360(false);
     }
   };
 
-  // Server-Side PDF Ingestion with Safe Parsing
+  // Project: Upload Single Thumbnail
+  const handleSingleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingSingle(true);
+    try {
+      const url = await uploadFileToCloud(file);
+      if (url) {
+        setFormData((prev) => {
+          const up = [...prev.projects];
+          if (!up[selectedProjectIndex]) return prev;
+
+          up[selectedProjectIndex] = {
+            ...up[selectedProjectIndex],
+            mediaUrl: url,
+            rotation360Images: [url],
+          };
+
+          return { ...prev, projects: up };
+        });
+      }
+    } finally {
+      e.target.value = "";
+      setUploadingSingle(false);
+    }
+  };
+
+  // PDF Parser
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -226,7 +268,7 @@ export default function AdminModal() {
       try {
         json = JSON.parse(rawResponse);
       } catch {
-        throw new Error(`Server returned non-JSON response (${res.status}): ${rawResponse.slice(0, 100)}`);
+        throw new Error(`Server returned non-JSON response (${res.status})`);
       }
 
       if (!res.ok || json.success === false) {
@@ -243,8 +285,7 @@ export default function AdminModal() {
 
       setPdfStats(`Parsed ${json.numPages} page(s) (${cleanedText.length} characters indexed)`);
     } catch (err: any) {
-      console.error("PDF Parsing Error:", err);
-      setPdfStats(err.message || "Extraction failed. Ensure PDF is readable.");
+      setPdfStats(err.message || "Extraction failed.");
     } finally {
       setParsingPdf(false);
       e.target.value = "";
@@ -285,6 +326,8 @@ export default function AdminModal() {
     setTheme(selectedTheme);
   };
 
+  // Dedicated Save Action
+// Dedicated Save Action
   const handleSave = async (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setSuccessMessage("Binding to cloud...");
@@ -294,14 +337,16 @@ export default function AdminModal() {
       adminPasscode: newPasscode.trim() || currentPassword,
     };
 
-    const synced = await updateData(payload);
+    // Pass true here so it performs the actual write to Redis!
+    const ok = await updateData(payload, true);
 
-    if (synced) {
+    if (ok) {
       setSuccessMessage("Globally Synchronized (Phone & PC)!");
     } else {
-      setSuccessMessage("Saved to device & cloud!");
+      setSuccessMessage("Saved locally on device!");
     }
-    setTimeout(() => setSuccessMessage(""), 3500);
+
+    setTimeout(() => setSuccessMessage(""), 4000);
   };
 
   const availableThemes: Array<{ id: ThemeType; label: string; previewBg: string; ringColor: string }> = [
@@ -586,13 +631,16 @@ export default function AdminModal() {
                               description: "Mathematical modeling and scalable server architecture.",
                               tags: ["TypeScript", "Next.js"],
                               mediaType: "image" as const,
-                              mediaUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+                              mediaUrl: "",
                               rotation360Images: [],
                               liveUrl: "https://",
                               githubUrl: "https://github.com",
                               featured: true
                             };
-                            setFormData({ ...formData, projects: [newP, ...formData.projects] });
+                            setFormData((prev) => ({
+                              ...prev,
+                              projects: [newP, ...prev.projects]
+                            }));
                             setSelectedProjectIndex(0);
                           }}
                           className="px-2.5 py-1 rounded-lg bg-[var(--color-primary)] text-[var(--color-bg)] text-xs font-bold flex items-center gap-1 hover:brightness-110"
@@ -712,10 +760,10 @@ export default function AdminModal() {
                               category: "New Competency Domain",
                               list: ["Skill Alpha", "Skill Beta"]
                             };
-                            setFormData({
-                              ...formData,
-                              skills: [...(formData.skills || []), newCategory]
-                            });
+                            setFormData((prev) => ({
+                              ...prev,
+                              skills: [...(prev.skills || []), newCategory]
+                            }));
                           }}
                           className="px-2.5 py-1 rounded-lg bg-[var(--color-primary)] text-[var(--color-bg)] text-xs font-bold flex items-center gap-1 hover:brightness-110"
                         >
@@ -926,7 +974,7 @@ export default function AdminModal() {
                   className="flex-1 py-3 overflow-y-auto book-scroll min-h-0 flex flex-col gap-4 text-[var(--color-text)]"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {/* SPREAD 1 RIGHT: HERO COPY & AVATAR (FOLIO 2) */}
+                  {/* SPREAD 1 RIGHT: HERO COPY & MULTI-FRAME HERO 360° (FOLIO 2) */}
                   {spread === 1 && (
                     <div className="flex flex-col gap-3">
                       <div>
@@ -966,33 +1014,108 @@ export default function AdminModal() {
                         />
                       </div>
 
-                      {/* Hero Portrait Upload */}
-                      <div>
-                        <label className="block text-[10px] font-mono uppercase text-[var(--color-muted)] mb-1">Hero Portrait Asset</label>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={formData.hero.avatarUrl}
-                            onChange={(e) => setFormData({ ...formData, hero: { ...formData.hero, avatarUrl: e.target.value } })}
-                            className="flex-1 px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-xs font-mono text-[var(--color-text)] bg-transparent"
-                            placeholder="Image URL or upload..."
-                          />
-                          <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl glass-panel border border-[var(--color-primary)] text-xs text-[var(--color-primary)] font-bold hover:bg-[var(--color-primary)] hover:text-[var(--color-bg)] transition-all">
-                            <Upload className="w-3.5 h-3.5" />
-                            <span>Upload</span>
+                      {/* HERO 360° PERSPECTIVE UPLOADER */}
+                      <div className="p-3.5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col gap-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--color-primary)] font-bold flex items-center gap-1.5">
+                            <RotateCw className="w-3.5 h-3.5" />
+                            <span>Hero 360° Perspectives ({formData.hero.rotation360Images?.length || (formData.hero.avatarUrl ? 1 : 0)} frames)</span>
+                          </span>
+                          {(formData.hero.rotation360Images?.length || 0) > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  hero: { ...prev.hero, rotation360Images: [] },
+                                }));
+                              }}
+                              className="text-[10px] font-mono text-red-400 hover:underline"
+                            >
+                              Clear Frames
+                            </button>
+                          )}
+                        </div>
+
+                        <p className="text-[10px] text-[var(--color-muted)] leading-tight">
+                          Upload multiple photos for your Hero avatar. Visitors will be able to scrub and view your portrait in 360°!
+                        </p>
+
+                        <div className="flex gap-2 items-center flex-wrap">
+                          <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--color-primary)] text-[var(--color-bg)] text-xs font-bold hover:brightness-110 transition-all shadow-sm">
+                            {uploadingHero360 ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                <span>Uploading to Cloudinary...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-3.5 h-3.5" />
+                                <span>Upload Multiple 360° Frames</span>
+                              </>
+                            )}
                             <input
                               type="file"
                               accept="image/*"
+                              multiple
+                              disabled={uploadingHero360}
                               className="hidden"
-                              onChange={(e) => handleFileUpload(e, (dataUrl) => {
-                                setFormData({
-                                  ...formData,
-                                  hero: { ...formData.hero, avatarUrl: dataUrl }
-                                });
-                              })}
+                              onChange={handleHero360Upload}
+                            />
+                          </label>
+
+                          <label className="cursor-pointer inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-[10px] font-mono text-[var(--color-text)] hover:border-[var(--color-primary)]">
+                            {uploadingHeroSingle ? (
+                              <>
+                                <Loader2 className="w-3 h-3 animate-spin text-[var(--color-primary)]" />
+                                <span>Uploading...</span>
+                              </>
+                            ) : (
+                              <>
+                                <ImageIcon className="w-3 h-3 text-[var(--color-primary)]" />
+                                <span>Single Avatar</span>
+                              </>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              disabled={uploadingHeroSingle}
+                              className="hidden"
+                              onChange={handleHeroSingleUpload}
                             />
                           </label>
                         </div>
+
+                        {/* Hero Frame Sequence Strip */}
+                        {formData.hero.rotation360Images && formData.hero.rotation360Images.length > 0 && (
+                          <div className="flex gap-1.5 overflow-x-auto py-1 book-scroll">
+                            {formData.hero.rotation360Images.map((imgUrl, i) => (
+                              <div key={i} className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-[var(--color-border)] group">
+                                <img src={imgUrl} alt={`Hero frame ${i + 1}`} className="w-full h-full object-cover" />
+                                <span className="absolute bottom-0 right-0 bg-black/75 text-[8px] font-mono px-1 text-white">
+                                  {i + 1}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const filtered = (formData.hero.rotation360Images || []).filter((_, idx) => idx !== i);
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      hero: {
+                                        ...prev.hero,
+                                        rotation360Images: filtered,
+                                        avatarUrl: filtered[0] || "",
+                                      },
+                                    }));
+                                  }}
+                                  className="absolute top-0 right-0 p-0.5 bg-red-600/90 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X className="w-2.5 h-2.5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1036,19 +1159,19 @@ export default function AdminModal() {
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--color-primary)] font-bold flex items-center gap-1.5">
                             <RotateCw className="w-3.5 h-3.5" />
-                            <span>Project 360° Perspectives ({formData.projects[selectedProjectIndex].rotation360Images?.length || 1} frames)</span>
+                            <span>Project 360° Perspectives ({formData.projects[selectedProjectIndex].rotation360Images?.length || (formData.projects[selectedProjectIndex].mediaUrl ? 1 : 0)} frames)</span>
                           </span>
-                          {(formData.projects[selectedProjectIndex].rotation360Images?.length || 0) > 1 && (
+                          {(formData.projects[selectedProjectIndex].rotation360Images?.length || 0) > 0 && (
                             <button
                               type="button"
                               onClick={() => {
                                 const up = [...formData.projects];
-                                up[selectedProjectIndex].rotation360Images = [up[selectedProjectIndex].mediaUrl || ""];
+                                up[selectedProjectIndex].rotation360Images = [];
                                 setFormData({ ...formData, projects: up });
                               }}
                               className="text-[10px] font-mono text-red-400 hover:underline"
                             >
-                              Clear 360
+                              Clear 360 Frames
                             </button>
                           )}
                         </div>
@@ -1062,7 +1185,7 @@ export default function AdminModal() {
                             {uploadingProject360 ? (
                               <>
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                <span>Compressing Frames...</span>
+                                <span>Uploading to Cloudinary...</span>
                               </>
                             ) : (
                               <>
@@ -1081,18 +1204,23 @@ export default function AdminModal() {
                           </label>
 
                           <label className="cursor-pointer inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl glass-panel border border-[var(--color-border)] text-[10px] font-mono text-[var(--color-text)] hover:border-[var(--color-primary)]">
-                            <ImageIcon className="w-3 h-3 text-[var(--color-primary)]" />
-                            <span>Single Thumbnail</span>
+                            {uploadingSingle ? (
+                              <>
+                                <Loader2 className="w-3 h-3 animate-spin text-[var(--color-primary)]" />
+                                <span>Uploading...</span>
+                              </>
+                            ) : (
+                              <>
+                                <ImageIcon className="w-3 h-3 text-[var(--color-primary)]" />
+                                <span>Single Thumbnail</span>
+                              </>
+                            )}
                             <input
                               type="file"
                               accept="image/*"
+                              disabled={uploadingSingle}
                               className="hidden"
-                              onChange={(e) => handleFileUpload(e, (dataUrl) => {
-                                const up = [...formData.projects];
-                                up[selectedProjectIndex].mediaUrl = dataUrl;
-                                up[selectedProjectIndex].rotation360Images = [dataUrl];
-                                setFormData({ ...formData, projects: up });
-                              })}
+                              onChange={handleSingleThumbnailUpload}
                             />
                           </label>
                         </div>
@@ -1112,7 +1240,7 @@ export default function AdminModal() {
                                     const up = [...formData.projects];
                                     const filtered = (up[selectedProjectIndex].rotation360Images || []).filter((_, idx) => idx !== i);
                                     up[selectedProjectIndex].rotation360Images = filtered;
-                                    up[selectedProjectIndex].mediaUrl = filtered[0] || up[selectedProjectIndex].mediaUrl;
+                                    up[selectedProjectIndex].mediaUrl = filtered[0] || "";
                                     setFormData({ ...formData, projects: up });
                                   }}
                                   className="absolute top-0 right-0 p-0.5 bg-red-600/90 text-white opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1272,19 +1400,22 @@ export default function AdminModal() {
 
                 {/* Right Page Turn Footer */}
                 <div 
-                  onClick={flipForward}
-                  className="pt-2 sm:pt-3 border-t border-[var(--color-border)] flex items-center justify-between text-[10px] sm:text-xs font-mono text-[var(--color-muted)] cursor-pointer hover:text-[var(--color-primary)] flex-shrink-0"
+                  className="pt-2 sm:pt-3 border-t border-[var(--color-border)] flex items-center justify-between text-[10px] sm:text-xs font-mono text-[var(--color-muted)] flex-shrink-0"
                 >
-                  <span className="flex items-center gap-1">
+                  <span 
+                    onClick={flipForward}
+                    className="flex items-center gap-1 cursor-pointer hover:text-[var(--color-primary)] transition-colors"
+                  >
                     {spread < 4 ? "Turn Forward" : "✦ Complete Edition"}
                     {spread < 4 && <ChevronRight className="w-3.5 h-3.5" />}
                   </span>
                   <button
                     type="button"
                     onClick={handleSave}
-                    className="text-[var(--color-primary)] font-bold hover:underline flex items-center gap-1"
+                    className="text-[var(--color-primary)] font-bold hover:underline flex items-center gap-1.5 cursor-pointer bg-[var(--color-surface)] px-3 py-1 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-all"
+                    title="Persist all changes directly to Upstash Redis Cloud"
                   >
-                    <Save className="w-3.5 h-3.5" /> Save
+                    <Save className="w-3.5 h-3.5" /> Save & Sync
                   </button>
                 </div>
               </div>

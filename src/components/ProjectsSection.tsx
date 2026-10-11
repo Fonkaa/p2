@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { usePortfolio } from "@/context/PortfolioContext";
 import { Project } from "@/types/portfolio";
-import { ArrowUpRight, RotateCw, Play, Pause, RefreshCw, ExternalLink } from "lucide-react";
+import { ArrowUpRight, RotateCw, Play, Pause, RefreshCw, ExternalLink, Image as ImageIcon } from "lucide-react";
 
 function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -15,8 +15,14 @@ function GithubIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 // Interactive 360-degree Showcase Card Media Stage
 function ProjectMediaStage({ project }: { project: Project }) {
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   // Video Mode
-  if (project.mediaType === "video" && project.mediaUrl) {
+  if (project?.mediaType === "video" && project?.mediaUrl) {
     return (
       <div className="relative w-full aspect-video sm:aspect-[16/9] overflow-hidden bg-[var(--color-surface)] border-b border-[var(--color-border)]">
         <video
@@ -30,10 +36,8 @@ function ProjectMediaStage({ project }: { project: Project }) {
     );
   }
 
-  // Multi-frame 360 sequence; fallback to single mediaUrl
-  const frames = Array.isArray(project.rotation360Images) && project.rotation360Images.length > 0
-    ? project.rotation360Images
-    : (project.mediaUrl ? [project.mediaUrl] : []);
+  const rawFrames = Array.isArray(project?.rotation360Images) ? project.rotation360Images : [];
+  const frames = rawFrames.length > 0 ? rawFrames : (project?.mediaUrl ? [project.mediaUrl] : []);
 
   const totalFrames = frames.length;
   const is360 = totalFrames > 1;
@@ -44,7 +48,6 @@ function ProjectMediaStage({ project }: { project: Project }) {
   const startXRef = useRef(0);
   const startFrameRef = useRef(0);
 
-  // Exact 3.5 seconds per frame interval
   const ROTATION_SPEED_MS = 3500;
 
   useEffect(() => {
@@ -53,7 +56,7 @@ function ProjectMediaStage({ project }: { project: Project }) {
     }
   }, [totalFrames, currentFrame]);
 
-  // Autoplay Rotation Loop
+  // Autoplay Loop
   useEffect(() => {
     if (!is360 || !isPlaying || isDragging) return;
 
@@ -64,7 +67,7 @@ function ProjectMediaStage({ project }: { project: Project }) {
     return () => clearInterval(interval);
   }, [is360, isPlaying, isDragging, totalFrames]);
 
-  // Manual Drag & Scrub Handlers (Mouse & Touch)
+  // Manual Drag Handlers
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!is360) return;
     setIsDragging(true);
@@ -76,7 +79,7 @@ function ProjectMediaStage({ project }: { project: Project }) {
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging || !is360) return;
     const deltaX = e.clientX - startXRef.current;
-    const sensitivity = 16; // 16px horizontal movement advances 1 frame
+    const sensitivity = 16;
     const offset = Math.floor(deltaX / sensitivity);
 
     let next = (startFrameRef.current - offset) % totalFrames;
@@ -93,6 +96,7 @@ function ProjectMediaStage({ project }: { project: Project }) {
   };
 
   const currentDegree = is360 ? Math.round((currentFrame / totalFrames) * 360) : 0;
+  const activeImage = frames[currentFrame] || project?.mediaUrl;
 
   return (
     <div
@@ -104,13 +108,25 @@ function ProjectMediaStage({ project }: { project: Project }) {
         is360 ? "cursor-grab active:cursor-grabbing" : ""
       }`}
       style={{ touchAction: is360 ? "none" : "auto" }}
+      suppressHydrationWarning
     >
-      <img
-        src={frames[currentFrame] || project.mediaUrl || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80"}
-        alt={`${project.title} - Perspective ${currentFrame + 1}`}
-        className="w-full h-full object-cover pointer-events-none select-none transition-all duration-500 ease-out"
-        draggable={false}
-      />
+      {activeImage ? (
+        <img
+          src={activeImage}
+          alt={`${project?.title || "Project"} - Perspective ${currentFrame + 1}`}
+          suppressHydrationWarning
+          className="w-full h-full object-cover pointer-events-none select-none transition-all duration-500 ease-out"
+          draggable={false}
+        />
+      ) : (
+        <div 
+          className="w-full h-full flex flex-col items-center justify-center text-[var(--color-muted)] gap-2 bg-[var(--color-surface)]"
+          suppressHydrationWarning
+        >
+          <ImageIcon className="w-8 h-8 opacity-40" />
+          <span className="text-xs font-mono">No preview uploaded</span>
+        </div>
+      )}
 
       <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-card)] via-transparent to-transparent opacity-60 pointer-events-none" />
 
@@ -119,7 +135,11 @@ function ProjectMediaStage({ project }: { project: Project }) {
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-20 pointer-events-auto">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full glass-panel border border-[var(--color-border)] text-[10px] font-mono text-[var(--color-primary)] shadow-md">
             <RotateCw className={`w-3 h-3 ${isPlaying && !isDragging ? "animate-spin" : ""}`} />
-            <span>{currentDegree}° (Frame {currentFrame + 1}/{totalFrames})</span>
+            <span suppressHydrationWarning>
+              {hasMounted
+                ? `${currentDegree}° (Frame ${currentFrame + 1}/${totalFrames})`
+                : `0° (Frame 1/${totalFrames})`}
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -163,7 +183,8 @@ function ProjectMediaStage({ project }: { project: Project }) {
 
 export default function ProjectsSection() {
   const { data } = usePortfolio();
-  const { projects, projectsCopy } = data;
+  const projects = Array.isArray(data?.projects) ? data.projects : [];
+  const projectsCopy = data?.projectsCopy;
 
   return (
     <section id="projects" className="py-24 px-4 sm:px-8 max-w-7xl mx-auto">
@@ -184,86 +205,89 @@ export default function ProjectsSection() {
 
       {/* Grid of Projects */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {projects.map((project) => (
-          <div
-            key={project.id}
-            className="group relative rounded-3xl glass-panel border border-[var(--color-border)] hover:border-[var(--color-primary)]/50 transition-all duration-500 flex flex-col justify-between overflow-hidden shadow-xl hover:shadow-2xl"
-          >
-            {/* Visual Media Container with 360 Scrubbing & 3.5s Rotation */}
-            <ProjectMediaStage project={project} />
+        {projects.map((project) => {
+          const tags = Array.isArray(project?.tags) ? project.tags : [];
 
-            {/* Content Body */}
-            <div className="p-6 sm:p-8 flex flex-col justify-between flex-1">
-              <div>
-                <div className="flex items-center justify-between gap-4 mb-3">
-                  <span className="text-xs font-mono text-[var(--color-primary)] uppercase tracking-wider font-semibold">
-                    {project.tagline}
-                  </span>
-                  
-                  {/* Action Link Icons */}
-                  <div className="flex items-center gap-2">
-                    {project.githubUrl && (
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 rounded-xl glass-panel text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all"
-                        title="View GitHub Repository"
-                      >
-                        <GithubIcon className="w-4 h-4" />
-                      </a>
-                    )}
-                    {project.liveUrl && (
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 rounded-xl glass-panel text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all"
-                        title="Open Live Host Link"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    )}
-                  </div>
-                </div>
+          return (
+            <div
+              key={project.id}
+              className="group relative rounded-3xl glass-panel border border-[var(--color-border)] hover:border-[var(--color-primary)]/50 transition-all duration-500 flex flex-col justify-between overflow-hidden shadow-xl hover:shadow-2xl"
+            >
+              <ProjectMediaStage project={project} />
 
-                <h3 className="font-serif text-2xl font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors mb-3">
-                  {project.title}
-                </h3>
-
-                <p className="text-sm text-[var(--color-muted)] leading-relaxed mb-6 font-sans">
-                  {project.description}
-                </p>
-              </div>
-
-              {/* Bottom Footer: Tags & Live Host CTA */}
-              <div className="pt-6 border-t border-[var(--color-border)] flex flex-wrap items-center justify-between gap-4">
-                <div className="flex flex-wrap gap-2">
-                  {project.tags.map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="text-[11px] font-mono px-3 py-1 rounded-lg bg-[var(--color-surface)] text-[var(--color-muted)] border border-[var(--color-border)]"
-                    >
-                      {tag}
+              {/* Content Body */}
+              <div className="p-6 sm:p-8 flex flex-col justify-between flex-1">
+                <div>
+                  <div className="flex items-center justify-between gap-4 mb-3">
+                    <span className="text-xs font-mono text-[var(--color-primary)] uppercase tracking-wider font-semibold">
+                      {project.tagline || ""}
                     </span>
-                  ))}
+
+                    {/* Action Link Icons */}
+                    <div className="flex items-center gap-2">
+                      {project.githubUrl && (
+                        <a
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-xl glass-panel text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all"
+                          title="View GitHub Repository"
+                        >
+                          <GithubIcon className="w-4 h-4" />
+                        </a>
+                      )}
+                      {project.liveUrl && (
+                        <a
+                          href={project.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-xl glass-panel text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all"
+                          title="Open Live Host Link"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  <h3 className="font-serif text-2xl font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors mb-3">
+                    {project.title}
+                  </h3>
+
+                  <p className="text-sm text-[var(--color-muted)] leading-relaxed mb-6 font-sans">
+                    {project.description}
+                  </p>
                 </div>
 
-                {project.liveUrl && (
-                  <a
-                    href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)] hover:underline uppercase tracking-wider ml-auto"
-                  >
-                    <span>Launch App</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </a>
-                )}
+                {/* Bottom Footer: Tags & Live Host CTA */}
+                <div className="pt-6 border-t border-[var(--color-border)] flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag, idx) => (
+                      <span
+                        key={idx}
+                        className="text-[11px] font-mono px-3 py-1 rounded-lg bg-[var(--color-surface)] text-[var(--color-muted)] border border-[var(--color-border)]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {project.liveUrl && (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)] hover:underline uppercase tracking-wider ml-auto"
+                    >
+                      <span>Launch App</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

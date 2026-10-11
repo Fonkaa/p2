@@ -5,45 +5,28 @@ import { initialData } from "@/data/initialData";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const DB_KEY = "luxury_portfolio_live_data";
+const DB_KEY = "luxury_portfolio_live_data_v1";
 
 const noCacheHeaders = {
-  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
   "CDN-Cache-Control": "no-store",
   "Vercel-CDN-Cache-Control": "no-store",
   "Content-Type": "application/json",
 };
 
-// In-memory server fallback cache when remote cloud network is unreachable
-let inMemoryFallbackState: any = null;
-
 function getSanitizedRedis(): Redis | null {
-  const rawUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "";
-  const rawToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
+  const rawUrl = (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "").trim().replace(/^["'`]+|["'`]+$/g, "");
+  const rawToken = (process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "").trim().replace(/^["'`]+|["'`]+$/g, "");
 
-  const url = rawUrl.replace(/^["'`]+|["'`]+$/g, "").trim();
-  const token = rawToken.replace(/^["'`]+|["'`]+$/g, "").trim();
-
-  if (!url || !token || !url.startsWith("https://")) {
+  if (!rawUrl || !rawToken || !rawUrl.startsWith("https://")) {
     return null;
   }
 
   try {
-    return new Redis({ url, token });
+    return new Redis({ url: rawUrl, token: rawToken });
   } catch (err: any) {
-    console.error("❌ [Upstash Client Init Error]:", err?.message || err);
     return null;
   }
-}
-
-// Timeout wrapper: Aborts hung fetches after 2.5s instead of hanging for 5s
-function withTimeout<T>(promise: Promise<T>, ms = 2500): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error("Cloud DB network timeout")), ms)
-    ),
-  ]);
 }
 
 export async function GET() {
@@ -51,31 +34,40 @@ export async function GET() {
 
   if (!redis) {
     return NextResponse.json(
-      { success: true, source: "local-default", data: inMemoryFallbackState || initialData },
+      { success: true, source: "no-redis-configured", data: initialData },
       { headers: noCacheHeaders }
     );
   }
 
   try {
-    const savedData = await withTimeout(redis.get(DB_KEY), 2000);
-    if (savedData) inMemoryFallbackState = savedData;
+    const raw = await redis.get(DB_KEY);
+
+    if (raw) {
+      let parsed = raw;
+      if (typeof raw === "string") {
+        try {
+          parsed = JSON.parse(raw);
+        } catch {
+          parsed = raw;
+        }
+      }
+
+      const frameCount = parsed?.projects?.[0]?.rotation360Images?.length || 0;
+      console.log(`[API GET] Retrieved data from Upstash Redis. Project 0 frame count: ${frameCount}`);
+
+      return NextResponse.json(
+        { success: true, source: "redis-cloud", data: parsed },
+        { headers: noCacheHeaders }
+      );
+    }
 
     return NextResponse.json(
-      {
-        success: true,
-        source: savedData ? "redis-cloud" : "redis-empty",
-        data: savedData || inMemoryFallbackState || initialData,
-      },
+      { success: true, source: "redis-empty", data: initialData },
       { headers: noCacheHeaders }
     );
   } catch (error: any) {
-    console.warn("[PORTFOLIO API] Remote DB unreachable, serving server fallback:", error?.message || error);
     return NextResponse.json(
-      {
-        success: true,
-        source: "local-fallback",
-        data: inMemoryFallbackState || initialData,
-      },
+      { success: false, source: "redis-error", data: initialData },
       { headers: noCacheHeaders }
     );
   }
@@ -85,49 +77,37 @@ export async function POST(req: NextRequest) {
   let body: any = null;
 
   try {
-    body = await req.json();
+    const text = await req.text();
+    body = JSON.parse(text);
   } catch {
     return NextResponse.json(
-      { success: false, error: "Invalid JSON request body." },
+      { success: false, error: "Invalid JSON" },
       { status: 400, headers: noCacheHeaders }
     );
   }
 
-  const currentPasscode = body?.adminPasscode || "fiker4620";
-  if (body?.adminPasscode !== currentPasscode) {
+  const redis = getSanitizedRedis();
+  if (!redis) {
     return NextResponse.json(
-      { success: false, error: "Unauthorized passcode." },
-      { status: 401, headers: noCacheHeaders }
+      { success: false, error: "Redis not configured" },
+      { status: 500, headers: noCacheHeaders }
     );
   }
 
-  // Update memory state immediately so server always has the latest edits
-  inMemoryFallbackState = body;
+  try {
+    const frameCount = body?.projects?.[0]?.rotation360Images?.length || 0;
+    console.log(`[API POST] Manual save by user. Inscribing ${frameCount} frames to Redis.`);
 
-  const redis = getSanitizedRedis();
+    await redis.set(DB_KEY, JSON.stringify(body));
 
-  if (redis) {
-    try {
-      await withTimeout(redis.set(DB_KEY, body), 3000);
-      return NextResponse.json(
-        { success: true, message: "Persisted to Upstash Redis Cloud." },
-        { status: 200, headers: noCacheHeaders }
-      );
-    } catch (dbError: any) {
-      console.warn("[PORTFOLIO API] Cloud write timed out/failed, saved to server memory & client cache:", dbError?.message || dbError);
-      // Return 200 with local confirmation instead of a crashing 500
-      return NextResponse.json(
-        {
-          success: true,
-          warning: "Cloud network timed out, saved locally on client & server memory.",
-        },
-        { status: 200, headers: noCacheHeaders }
-      );
-    }
+    return NextResponse.json(
+      { success: true, message: "Saved to Redis", frameCount },
+      { status: 200, headers: noCacheHeaders }
+    );
+  } catch (err: any) {
+    return NextResponse.json(
+      { success: false, error: err?.message || "Write failed" },
+      { status: 500, headers: noCacheHeaders }
+    );
   }
-
-  return NextResponse.json(
-    { success: true, message: "Saved to in-memory state." },
-    { status: 200, headers: noCacheHeaders }
-  );
 }

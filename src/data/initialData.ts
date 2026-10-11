@@ -39,15 +39,17 @@ export const initialData: PortfolioData = {
     subheading: "A curated index of production architectures, AI pipelines, and distributed platforms.",
   },
 projects: [
-    {
+ {
       id: "smart-internship",
       title: "Smart Internship & Job Matching System",
       tagline: "AI Matching & Multi-Role Pipeline",
       description: "FastAPI and Express microservice architecture with automated scoring algorithms, normalized database schema, and role-based matching workflows.",
       tags: ["FastAPI", "Express.js", "PostgreSQL", "Next.js"],
       mediaType: "image",
-      mediaUrl: "", // <-- clear hardcoded unsplash url
-      rotation360Images: [], // <-- start empty so it only uses your uploaded photos
+      mediaUrl: "https://res.cloudinary.com/nytwathq/image/upload/v1791700627/portfolio_assets/e0flv8sfnf18n5a5h26i.jpg", // your uploaded image
+      rotation360Images: [
+        "https://res.cloudinary.com/nytwathq/image/upload/v1791700627/portfolio_assets/e0flv8sfnf18n5a5h26i.jpg"
+      ],
       liveUrl: "https://",
       githubUrl: "https://github.com/Fonkaa",
       featured: true,

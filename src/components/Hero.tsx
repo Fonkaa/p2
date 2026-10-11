@@ -8,6 +8,12 @@ export default function Hero() {
   const { data } = usePortfolio();
   const { hero } = data;
 
+  // Mount detection to guarantee safe SSR hydration matching
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   // Read uploaded 360 images array; fallback to avatarUrl
   const uploadedImages = Array.isArray(hero.rotation360Images) && hero.rotation360Images.length > 0
     ? hero.rotation360Images
@@ -30,15 +36,15 @@ export default function Hero() {
   }, [totalFrames, currentFrame]);
 
   // Autoplay Rotation Loop
- useEffect(() => {
-  if (!is360 || !isPlaying || isDragging) return;
+  useEffect(() => {
+    if (!is360 || !isPlaying || isDragging) return;
 
-  const interval = setInterval(() => {
-    setCurrentFrame((prev) => (prev + 1) % totalFrames);
-  }, 3500); // 3.5 seconds
+    const interval = setInterval(() => {
+      setCurrentFrame((prev) => (prev + 1) % totalFrames);
+    }, 3500); // 3.5 seconds
 
-  return () => clearInterval(interval);
-}, [is360, isPlaying, isDragging, totalFrames]);
+    return () => clearInterval(interval);
+  }, [is360, isPlaying, isDragging, totalFrames]);
 
   // Pointer drag scrubbing
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -69,6 +75,7 @@ export default function Hero() {
   };
 
   const currentDegree = is360 ? Math.round((currentFrame / totalFrames) * 360) : 0;
+  const activeImage = uploadedImages[currentFrame] || hero.avatarUrl;
 
   return (
     <section id="hero" className="relative pt-36 pb-20 md:pt-48 md:pb-32 px-4 sm:px-8 max-w-7xl mx-auto overflow-hidden">
@@ -141,12 +148,15 @@ export default function Hero() {
                 style={{ touchAction: "none" }}
               >
                 {/* Image Frame */}
-                <img
-                  src={uploadedImages[currentFrame] || hero.avatarUrl}
-                  alt={`Angle Frame ${currentFrame + 1}`}
-                  className="w-full h-full object-cover object-top pointer-events-none select-none transition-transform duration-75"
-                  draggable={false}
-                />
+                {activeImage && (
+                  <img
+                    src={activeImage}
+                    alt={`Angle Frame ${currentFrame + 1}`}
+                    suppressHydrationWarning
+                    className="w-full h-full object-cover object-top pointer-events-none select-none transition-transform duration-75"
+                    draggable={false}
+                  />
+                )}
 
                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)] via-transparent to-transparent opacity-60 pointer-events-none" />
 
@@ -155,7 +165,11 @@ export default function Hero() {
                   <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-20 pointer-events-auto">
                     <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full glass-panel border border-[var(--color-border)] text-[10px] font-mono text-[var(--color-primary)] shadow-sm">
                       <RotateCw className={`w-3 h-3 ${isPlaying && !isDragging ? "animate-spin" : ""}`} />
-                      <span>{currentDegree}° (Frame {currentFrame + 1}/{totalFrames})</span>
+                      <span suppressHydrationWarning>
+                        {hasMounted
+                          ? `${currentDegree}° (Frame ${currentFrame + 1}/${totalFrames})`
+                          : `0° (Frame 1/${totalFrames})`}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-1">
@@ -193,7 +207,7 @@ export default function Hero() {
                       {hero.status || "Open to Engagements"}
                     </span>
                   </div>
-                  <span className="text-[10px] text-[var(--color-muted)] font-mono">
+                  <span suppressHydrationWarning className="text-[10px] text-[var(--color-muted)] font-mono">
                     {is360 ? `${totalFrames} Perspectives` : "Single Perspective"}
                   </span>
                 </div>
@@ -201,7 +215,7 @@ export default function Hero() {
 
               {/* Interaction Callout */}
               <div className="text-center pt-2 pb-0.5">
-                <span className="text-[10px] font-mono text-[var(--color-muted)] tracking-wider uppercase">
+                <span suppressHydrationWarning className="text-[10px] font-mono text-[var(--color-muted)] tracking-wider uppercase">
                   {is360 ? "◄ Drag horizontally to scrub 360° ►" : "Upload multiple angle photos in Admin Folio 2 for 360° view"}
                 </span>
               </div>
